@@ -57,15 +57,15 @@ export interface IOrder extends Document<string> {
     total: number;
   };
   payment: {
-    method: 'Razorpay' | 'UPI' | 'Credit/Debit Card' | 'Net Banking' | 'Cash on Delivery';
+    method: string;
     transactionId?: string;
     razorpayOrderId?: string;
     razorpayPaymentId?: string;
     razorpaySignature?: string;
-    status: 'pending' | 'paid' | 'failed' | 'refunded';
+    status: string;
     paidAt?: Date;
   };
-  status: 'Order Placed' | 'Payment Confirmed' | 'Processing' | 'Packed' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Cancelled' | 'Returned';
+  status: string;
   tracking: {
     courier?: string;
     trackingNumber?: string;
@@ -134,8 +134,7 @@ const OrderSchema = new Schema<IOrder>(
     payment: {
       method: {
         type: String,
-        enum: ['Razorpay', 'UPI', 'Credit/Debit Card', 'Net Banking', 'Cash on Delivery'],
-        default: 'Razorpay',
+        default: 'Pay at Store',
       },
       transactionId: { type: String, default: '' },
       razorpayOrderId: { type: String, default: '' },
@@ -143,25 +142,13 @@ const OrderSchema = new Schema<IOrder>(
       razorpaySignature: { type: String, default: '' },
       status: {
         type: String,
-        enum: ['pending', 'paid', 'failed', 'refunded'],
-        default: 'pending',
+        default: 'pending_pickup',
       },
       paidAt: { type: Date },
     },
     status: {
       type: String,
-      enum: [
-        'Order Placed',
-        'Payment Confirmed',
-        'Processing',
-        'Packed',
-        'Shipped',
-        'Out for Delivery',
-        'Delivered',
-        'Cancelled',
-        'Returned',
-      ],
-      default: 'Order Placed',
+      default: 'Pickup Requested',
     },
     tracking: {
       courier: { type: String, default: '' },
