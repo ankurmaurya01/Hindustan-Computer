@@ -1,9 +1,5 @@
 import mongoose from 'mongoose';
 
-/**
- * Global is used here to maintain a cached connection across hot reloads in development.
- * This prevents connections from growing exponentially during API Route usage.
- */
 interface MongooseCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
@@ -30,17 +26,12 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
   if (!cached?.promise) {
     const opts = {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
     };
 
     cached!.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
-      console.log('>>> [DB] Connected successfully to MongoDB at:', MONGODB_URI);
+      console.log('>>> [DB] Connected to MongoDB');
       return mongooseInstance;
-    }).catch(async (err) => {
-      console.warn('>>> [DB] Direct MongoDB connection failed:', err.message);
-      console.log('>>> [DB] Falling back to robust embedded data store for local preview.');
-      // Return mongoose or dummy to prevent app from crashing
-      throw err;
     });
   }
 
@@ -53,5 +44,3 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
 
   return cached!.conn;
 }
-
-export default connectToDatabase;

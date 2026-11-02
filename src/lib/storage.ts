@@ -1,6 +1,15 @@
-import fs from 'fs';
-import path from 'path';
+import { connectToDatabase } from './db';
+import Product from './models/Product';
+import Category from './models/Category';
+import Order from './models/Order';
+import User from './models/User';
+import Coupon from './models/Coupon';
+import Banner from './models/Banner';
+import Review from './models/Review';
+import InventoryLog from './models/InventoryLog';
+import Setting from './models/Setting';
 import bcrypt from 'bcryptjs';
+import mongoose, { Schema, Model, Document } from 'mongoose';
 import {
   INITIAL_CATEGORIES,
   INITIAL_PRODUCTS,
@@ -12,138 +21,99 @@ import {
   CategoryData,
 } from './initialData';
 
-// Vercel: filesystem is read-only except /tmp. We use /tmp for writes when
-// the normal data directory is not writable (serverless / Vercel environment).
-const IS_VERCEL = process.env.VERCEL === '1' || process.env.VERCEL_ENV !== undefined;
-const DATA_DIR = IS_VERCEL
-  ? '/tmp/hindustan_data'
-  : path.join(process.cwd(), 'data');
-const DB_FILE = path.join(DATA_DIR, 'hindustan_db.json');
+// ─── RepairInquiry model (defined inline) ────────────────────────────────────
 
-// Seed file shipped with the repo (read-only source of truth for categories/banners/coupons)
-const SEED_FILE = path.join(process.cwd(), 'data', 'hindustan_db.json');
-
-interface LocalDatabase {
-  users: any[];
-  products: ProductData[];
-  categories: CategoryData[];
-  orders: any[];
-  coupons: any[];
-  banners: any[];
-  reviews: any[];
-  inventoryLogs: any[];
-  settings: any;
+interface IRepairInquiry extends Document {
+  deviceType: string;
+  problem: string;
+  details: string;
+  customerName: string;
+  phone: string;
+  status: string;
+  createdAt: Date;
 }
 
-// In-memory cache (survives within a single serverless invocation)
-let memoryDb: LocalDatabase | null = null;
+const RepairInquirySchema = new Schema<IRepairInquiry>(
+  {
+    deviceType: { type: String, required: true },
+    problem: { type: String, required: true },
+    details: { type: String, default: '' },
+    customerName: { type: String, required: true },
+    phone: { type: String, required: true },
+    status: { type: String, default: 'pending' },
+  },
+  { timestamps: { createdAt: true, updatedAt: false } }
+);
 
-function buildFreshDb(): LocalDatabase {
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@hindustancomputer.com';
-  const adminPassword = process.env.ADMIN_PASSWORD || '9935908565';
-  const defaultPasswordHash = bcrypt.hashSync(adminPassword, 10);
+const RepairInquiry: Model<IRepairInquiry> =
+  mongoose.models.RepairInquiry || mongoose.model<IRepairInquiry>('RepairInquiry', RepairInquirySchema);
 
-  const settings = {
-    ...INITIAL_SETTINGS,
-    email: process.env.NEXT_PUBLIC_STORE_EMAIL || INITIAL_SETTINGS.email,
-    phone: process.env.NEXT_PUBLIC_STORE_PHONE || INITIAL_SETTINGS.phone,
-    whatsapp: (process.env.NEXT_PUBLIC_STORE_WHATSAPP || INITIAL_SETTINGS.whatsapp).replace('+', ''),
-    address: process.env.NEXT_PUBLIC_STORE_ADDRESS || INITIAL_SETTINGS.address,
-  };
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-  return {
-    users: [
-      {
-        _id: 'usr_superadmin',
-        name: 'Administrator',
-        email: adminEmail,
-        password: defaultPasswordHash,
-        phone: settings.phone,
-        role: 'superadmin',
-        isActive: true,
-        addresses: [],
-        wishlist: [],
-        totalSpent: 0,
-        totalOrders: 0,
-        createdAt: new Date(),
-      },
-    ],
-    products: [...INITIAL_PRODUCTS],
-    categories: [...INITIAL_CATEGORIES],
-    orders: [...INITIAL_ORDERS],
-    coupons: [...INITIAL_COUPONS],
-    banners: [...INITIAL_BANNERS],
-    reviews: [],
-    inventoryLogs: INITIAL_PRODUCTS.map((p) => ({
-      _id: 'inv_' + Math.random().toString(36).substring(2, 9),
-      productId: p._id,
-      productName: p.name,
-      sku: p.sku,
-      changeType: 'STOCK_IN',
-      quantityChanged: p.stock,
-      previousStock: 0,
-      newStock: p.stock,
-      reason: 'Initial Warehouse Inward Consignment',
-      performedBy: 'Administrator',
-      createdAt: new Date(),
-    })),
-    settings,
-  };
+async function db(): Promise<void> {
+  await connectToDatabase();
 }
 
-function ensureDataFile(): LocalDatabase {
-  if (memoryDb) {
-    return memoryDb;
-  }
+let seeded = false;
 
-  // 1. Try reading from writable DB_FILE (local dev or /tmp on Vercel)
-  try {
-    if (fs.existsSync(DB_FILE)) {
-      const raw = fs.readFileSync(DB_FILE, 'utf-8');
-      memoryDb = JSON.parse(raw);
-      return memoryDb!;
+async function ensureSeeded(): Promise<void> {
+  await db();
+  if (seeded) return;
+
+  const existingSetting = await Setting.findOne().lean();
+  if (!existingSetting) {
+    // Seed admin user
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@hindustancomputer.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || '9935908565';
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+    await User.create({
+      name: 'Admin',
+      email: adminEmail,
+      password: hashedPassword,
+      role: 'superadmin',
+      isActive: true,
+    });
+
+    // Seed categories
+    if (INITIAL_CATEGORIES.length > 0) {
+      await Category.insertMany(INITIAL_CATEGORIES);
     }
-  } catch (err) {
-    console.warn('Could not read writable DB file, will try seed:', err);
-  }
 
-  // 2. On local dev, also try reading from the committed seed file
-  if (!IS_VERCEL) {
-    try {
-      if (fs.existsSync(SEED_FILE)) {
-        const raw = fs.readFileSync(SEED_FILE, 'utf-8');
-        memoryDb = JSON.parse(raw);
-        return memoryDb!;
-      }
-    } catch (err) {
-      console.warn('Could not read seed file, building fresh DB:', err);
+    // Seed banners
+    if (INITIAL_BANNERS.length > 0) {
+      await Banner.insertMany(INITIAL_BANNERS);
     }
+
+    // Seed coupons
+    if (INITIAL_COUPONS.length > 0) {
+      await Coupon.insertMany(INITIAL_COUPONS);
+    }
+
+    // Seed settings
+    await Setting.create(INITIAL_SETTINGS);
+
+    console.log('>>> [DB] Database seeded with initial data');
   }
 
-  // 3. Build a fresh DB from initialData
-  memoryDb = buildFreshDb();
-  persistDatabase();
-  return memoryDb;
+  seeded = true;
 }
 
-function persistDatabase() {
-  if (!memoryDb) return;
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-    fs.writeFileSync(DB_FILE, JSON.stringify(memoryDb, null, 2), 'utf-8');
-  } catch (err) {
-    // On Vercel: writes go to /tmp and are scoped to this invocation only.
-    // Data added via admin panel persists within the same serverless function
-    // instance but resets when a new instance starts. For permanent storage,
-    // connect a database (MongoDB Atlas / Vercel KV).
-    console.warn('DB write failed (expected on read-only FS):', (err as Error).message);
-  }
+// ─── Slug helper ──────────────────────────────────────────────────────────────
+
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
+
+// ─── Storage ──────────────────────────────────────────────────────────────────
 
 export const Storage = {
-  // PRODUCTS
+  // ────────── Products ──────────
+
   async getProducts(params?: {
     category?: string;
     brand?: string;
@@ -158,424 +128,337 @@ export const Storage = {
     page?: number;
     limit?: number;
   }) {
-    const db = ensureDataFile();
-    let items = [...db.products];
+    await ensureSeeded();
+    const {
+      category,
+      brand,
+      search,
+      minPrice,
+      maxPrice,
+      inStockOnly,
+      featured,
+      bestseller,
+      newArrival,
+      sort,
+      page = 1,
+      limit = 12,
+    } = params || {};
 
-    if (params?.category && params.category !== 'all') {
-      items = items.filter((p) => p.category.toLowerCase() === params.category!.toLowerCase());
+    const filter: any = {};
+
+    if (category) filter.category = category;
+    if (brand) filter.brand = brand;
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { brand: { $regex: search, $options: 'i' } },
+        { tags: { $regex: search, $options: 'i' } },
+      ];
     }
-
-    if (params?.brand && params.brand !== 'all') {
-      items = items.filter((p) => p.brand.toLowerCase() === params.brand!.toLowerCase());
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      filter.sellingPrice = {};
+      if (minPrice !== undefined) filter.sellingPrice.$gte = minPrice;
+      if (maxPrice !== undefined) filter.sellingPrice.$lte = maxPrice;
     }
+    if (inStockOnly) filter.stock = { $gt: 0 };
+    if (featured) filter.isFeatured = true;
+    if (bestseller) filter.isBestseller = true;
+    if (newArrival) filter.isNewArrival = true;
 
-    if (params?.search) {
-      const q = params.search.toLowerCase().trim();
-      items = items.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q) ||
-          p.sku.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.tags?.some((t) => t.toLowerCase().includes(q))
-      );
-    }
-
-    if (params?.minPrice !== undefined) {
-      items = items.filter((p) => p.sellingPrice >= params.minPrice!);
-    }
-
-    if (params?.maxPrice !== undefined) {
-      items = items.filter((p) => p.sellingPrice <= params.maxPrice!);
-    }
-
-    if (params?.inStockOnly) {
-      items = items.filter((p) => p.stock > 0);
-    }
-
-    if (params?.featured) {
-      items = items.filter((p) => p.isFeatured);
-    }
-
-    if (params?.bestseller) {
-      items = items.filter((p) => p.isBestseller);
-    }
-
-    if (params?.newArrival) {
-      items = items.filter((p) => p.isNewArrival);
-    }
-
-    // Sorting
-    switch (params?.sort) {
+    let sortObj: any = { createdAt: -1 };
+    switch (sort) {
       case 'price-asc':
-        items.sort((a, b) => a.sellingPrice - b.sellingPrice);
+        sortObj = { sellingPrice: 1 };
         break;
       case 'price-desc':
-        items.sort((a, b) => b.sellingPrice - a.sellingPrice);
+        sortObj = { sellingPrice: -1 };
         break;
       case 'rating':
-        items.sort((a, b) => b.rating - a.rating);
+        sortObj = { rating: -1 };
         break;
       case 'discount':
-        items.sort((a, b) => b.discountPercentage - a.discountPercentage);
+        sortObj = { discountPercentage: -1 };
         break;
       case 'newest':
-      default:
-        // default natural or id
+        sortObj = { createdAt: -1 };
         break;
     }
 
-    const total = items.length;
-    const page = params?.page || 1;
-    const limit = params?.limit || 24;
-    const startIndex = (page - 1) * limit;
-    const paginated = items.slice(startIndex, startIndex + limit);
+    const skip = (page - 1) * limit;
+    const [products, total] = await Promise.all([
+      Product.find(filter).sort(sortObj).skip(skip).limit(limit).lean(),
+      Product.countDocuments(filter),
+    ]);
 
     return {
-      products: paginated,
+      products,
       total,
       page,
-      totalPages: Math.ceil(total / limit) || 1,
+      totalPages: Math.ceil(total / limit),
     };
   },
 
   async getProductById(id: string) {
-    const db = ensureDataFile();
-    return db.products.find((p) => p._id === id || p.slug === id) || null;
+    await ensureSeeded();
+    const product = await Product.findOne({
+      $or: [{ slug: id }, ...(mongoose.Types.ObjectId.isValid(id) ? [{ _id: id }] : [])],
+    }).lean();
+    return product || null;
   },
 
   async getProductBySlug(slug: string) {
-    const db = ensureDataFile();
-    return db.products.find((p) => p.slug === slug || p._id === slug) || null;
+    await ensureSeeded();
+    const product = await Product.findOne({
+      $or: [{ slug }, ...(mongoose.Types.ObjectId.isValid(slug) ? [{ _id: slug }] : [])],
+    }).lean();
+    return product || null;
   },
 
   async createProduct(data: any) {
-    const db = ensureDataFile();
-    const newId = 'prod_' + Date.now();
-    const slug =
-      data.slug ||
-      data.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)+/g, '');
-    const sku = data.sku || 'HC-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-    const discount =
-      data.mrp && data.sellingPrice
-        ? Math.round(((data.mrp - data.sellingPrice) / data.mrp) * 100)
-        : 0;
-
-    const newProduct: ProductData = {
-      _id: newId,
-      name: data.name,
-      slug,
-      sku,
-      barcode: data.barcode || '',
-      brand: data.brand || 'Hindustan Computer',
-      category: data.category || 'computer-accessories',
-      subcategory: data.subcategory || '',
-      shortDescription: data.shortDescription || data.name,
-      description: data.description || data.name,
-      images: data.images && data.images.length > 0 ? data.images : [
-        'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=800&q=80',
-      ],
-      mrp: Number(data.mrp) || Number(data.sellingPrice) || 999,
-      sellingPrice: Number(data.sellingPrice) || 999,
-      purchasePrice: Number(data.purchasePrice) || 0,
-      discountPercentage: discount > 0 ? discount : 0,
-      gstPercentage: Number(data.gstPercentage) || 18,
-      stock: Number(data.stock) || 0,
-      lowStockThreshold: Number(data.lowStockThreshold) || 5,
-      weight: data.weight || '',
-      dimensions: data.dimensions || '',
-      warranty: data.warranty || '1 Year Manufacturer Warranty',
-      specifications: data.specifications || [],
-      highlights: data.highlights || [],
-      isFeatured: !!data.isFeatured,
-      isBestseller: !!data.isBestseller,
-      isNewArrival: !!data.isNewArrival,
-      isTrending: !!data.isTrending,
-      isActive: data.isActive !== undefined ? !!data.isActive : true,
-      rating: 5.0,
-      numReviews: 0,
-      tags: data.tags || [],
-      seoTitle: data.seoTitle || '',
-      seoDescription: data.seoDescription || '',
-    };
-
-    db.products.unshift(newProduct);
-
-    // Record initial inventory log
-    db.inventoryLogs.unshift({
-      _id: 'inv_' + Date.now(),
-      productId: newId,
-      productName: newProduct.name,
-      sku: newProduct.sku,
-      changeType: 'STOCK_IN',
-      quantityChanged: newProduct.stock,
-      previousStock: 0,
-      newStock: newProduct.stock,
-      reason: 'Product Creation Stock Inward',
-      supplierName: 'Direct Inward Entry',
-      performedBy: 'Admin',
-      createdAt: new Date(),
-    });
-
-    persistDatabase();
-    return newProduct;
-  },
-
-  async updateProduct(id: string, updates: Partial<ProductData>) {
-    const db = ensureDataFile();
-    const index = db.products.findIndex((p) => p._id === id);
-    if (index === -1) return null;
-
-    const current = db.products[index];
-    const oldStock = current.stock;
-
-    if (updates.mrp && updates.sellingPrice) {
-      updates.discountPercentage = Math.round(
-        ((updates.mrp - updates.sellingPrice) / updates.mrp) * 100
-      );
+    await ensureSeeded();
+    if (!data.slug) {
+      data.slug = generateSlug(data.name);
+    }
+    if (!data.sku) {
+      data.sku = 'HC-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+    if (data.mrp && data.sellingPrice) {
+      data.discountPercentage = Math.round(((data.mrp - data.sellingPrice) / data.mrp) * 100);
+    }
+    if (!data.images || data.images.length === 0) {
+      data.images = ['https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=600&q=80'];
     }
 
-    const updated = { ...current, ...updates };
-    db.products[index] = updated;
+    const product = await Product.create(data);
 
-    // Log stock change if updated directly
-    if (updates.stock !== undefined && updates.stock !== oldStock) {
-      const diff = updates.stock - oldStock;
-      db.inventoryLogs.unshift({
-        _id: 'inv_' + Date.now(),
-        productId: current._id,
-        productName: current.name,
-        sku: current.sku,
-        changeType: diff > 0 ? 'STOCK_IN' : 'MANUAL_ADJUST',
-        quantityChanged: diff,
-        previousStock: oldStock,
+    // Create initial inventory log
+    await InventoryLog.create({
+      productId: product._id.toString(),
+      productName: product.name,
+      sku: product.sku,
+      changeType: 'STOCK_IN',
+      quantityChanged: product.stock || 0,
+      previousStock: 0,
+      newStock: product.stock || 0,
+      reason: 'Initial stock on product creation',
+      performedBy: 'Admin',
+    });
+
+    return product.toObject();
+  },
+
+  async updateProduct(id: string, updates: any) {
+    await ensureSeeded();
+    const product = await Product.findById(id);
+    if (!product) return null;
+
+    const previousStock = product.stock;
+
+    // Recalculate discount if mrp and sellingPrice are present
+    if (updates.mrp !== undefined && updates.sellingPrice !== undefined) {
+      updates.discountPercentage = Math.round(((updates.mrp - updates.sellingPrice) / updates.mrp) * 100);
+    } else if (updates.mrp !== undefined) {
+      updates.discountPercentage = Math.round(((updates.mrp - product.sellingPrice) / updates.mrp) * 100);
+    } else if (updates.sellingPrice !== undefined) {
+      updates.discountPercentage = Math.round(((product.mrp - updates.sellingPrice) / product.mrp) * 100);
+    }
+
+    Object.assign(product, updates);
+    await product.save();
+
+    // Create inventory log if stock changed
+    if (updates.stock !== undefined && updates.stock !== previousStock) {
+      await InventoryLog.create({
+        productId: product._id.toString(),
+        productName: product.name,
+        sku: product.sku,
+        changeType: 'MANUAL_ADJUST',
+        quantityChanged: updates.stock - previousStock,
+        previousStock,
         newStock: updates.stock,
-        reason: 'Manual Product Stock Edit in Admin Panel',
+        reason: 'Stock updated via product edit',
         performedBy: 'Admin',
-        createdAt: new Date(),
       });
     }
 
-    persistDatabase();
-    return updated;
+    return product.toObject();
   },
 
   async deleteProduct(id: string) {
-    const db = ensureDataFile();
-    const index = db.products.findIndex((p) => p._id === id);
-    if (index === -1) return false;
-    db.products.splice(index, 1);
-    persistDatabase();
-    return true;
+    await ensureSeeded();
+    const result = await Product.findByIdAndDelete(id);
+    return !!result;
   },
 
-  // CATEGORIES
+  // ────────── Categories ──────────
+
   async getCategories() {
-    const db = ensureDataFile();
-    return db.categories.sort((a, b) => a.order - b.order);
+    await ensureSeeded();
+    return Category.find().sort({ order: 1 }).lean();
   },
 
   async getCategoryBySlug(slug: string) {
-    const db = ensureDataFile();
-    return db.categories.find((c) => c.slug === slug || c._id === slug) || null;
+    await ensureSeeded();
+    const category = await Category.findOne({
+      $or: [{ slug }, ...(mongoose.Types.ObjectId.isValid(slug) ? [{ _id: slug }] : [])],
+    }).lean();
+    return category || null;
   },
 
   async createCategory(data: any) {
-    const db = ensureDataFile();
-    const slug =
-      data.slug ||
-      data.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)+/g, '');
-    const newCat: CategoryData = {
-      _id: 'cat_' + Date.now(),
-      name: data.name,
-      slug,
-      description: data.description || '',
-      image: data.image || 'https://images.unsplash.com/photo-1555617778-02518510b9fa?auto=format&fit=crop&w=600&q=80',
-      iconName: data.iconName || 'Cpu',
-      subcategories: data.subcategories || [],
-      order: Number(data.order) || db.categories.length + 1,
-      isActive: data.isActive !== undefined ? !!data.isActive : true,
-      featured: !!data.featured,
-    };
-    db.categories.push(newCat);
-    persistDatabase();
-    return newCat;
+    await ensureSeeded();
+    if (!data.slug) {
+      data.slug = generateSlug(data.name);
+    }
+    const category = await Category.create(data);
+    return category.toObject();
   },
 
-  async updateCategory(id: string, updates: Partial<CategoryData>) {
-    const db = ensureDataFile();
-    const index = db.categories.findIndex((c) => c._id === id);
-    if (index === -1) return null;
-    db.categories[index] = { ...db.categories[index], ...updates };
-    persistDatabase();
-    return db.categories[index];
+  async updateCategory(id: string, updates: any) {
+    await ensureSeeded();
+    const updated = await Category.findByIdAndUpdate(id, updates, { new: true }).lean();
+    return updated || null;
   },
 
   async deleteCategory(id: string) {
-    const db = ensureDataFile();
-    const cat = db.categories.find((c) => c._id === id);
+    await ensureSeeded();
+    const cat = await Category.findById(id).lean();
     if (!cat) return { success: false, message: 'Category not found' };
 
-    // Safeguard: Check if products exist in category
-    const hasProducts = db.products.some((p) => p.category.toLowerCase() === cat.slug.toLowerCase());
-    if (hasProducts) {
+    // Check if any products reference this category
+    const productCount = await Product.countDocuments({
+      category: { $regex: new RegExp(`^${cat.slug}$`, 'i') },
+    });
+
+    if (productCount > 0) {
       return {
         success: false,
-        message: 'Cannot delete category containing active products. Reassign or delete products first.',
+        message: `Cannot delete category "${cat.name}" because ${productCount} product(s) are assigned to it.`,
       };
     }
 
-    db.categories = db.categories.filter((c) => c._id !== id);
-    persistDatabase();
+    await Category.findByIdAndDelete(id);
     return { success: true };
   },
 
-  // ORDERS
+  // ────────── Orders ──────────
+
   async getOrders(params?: { status?: string; search?: string }) {
-    const db = ensureDataFile();
-    let list = [...db.orders];
-
-    if (params?.status && params.status !== 'all') {
-      list = list.filter((o) => o.status.toLowerCase() === params.status!.toLowerCase());
-    }
-
+    await ensureSeeded();
+    const filter: any = {};
+    if (params?.status) filter.status = params.status;
     if (params?.search) {
-      const q = params.search.toLowerCase().trim();
-      list = list.filter(
-        (o) =>
-          o.orderNumber.toLowerCase().includes(q) ||
-          o.customer.name.toLowerCase().includes(q) ||
-          o.customer.phone.toLowerCase().includes(q) ||
-          o.customer.email.toLowerCase().includes(q)
-      );
+      filter.$or = [
+        { orderNumber: { $regex: params.search, $options: 'i' } },
+        { 'customer.name': { $regex: params.search, $options: 'i' } },
+        { 'customer.phone': { $regex: params.search, $options: 'i' } },
+        { 'customer.email': { $regex: params.search, $options: 'i' } },
+      ];
     }
-
-    return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return Order.find(filter).sort({ createdAt: -1 }).lean();
   },
 
   async getOrderById(id: string) {
-    const db = ensureDataFile();
-    return (
-      db.orders.find((o) => o._id === id || o.orderNumber === id) || null
-    );
-  },
-
-  async trackOrder(orderNumber: string, phone: string) {
-    const db = ensureDataFile();
-    const cleanPhone = phone.replace(/[^0-9]/g, '').slice(-10);
-    const order = db.orders.find((o) => {
-      const oNumMatch = o.orderNumber.toLowerCase() === orderNumber.toLowerCase().trim();
-      const oPhone = o.customer.phone.replace(/[^0-9]/g, '').slice(-10);
-      return oNumMatch && oPhone === cleanPhone;
-    });
+    await ensureSeeded();
+    const order = await Order.findOne({
+      $or: [
+        ...(mongoose.Types.ObjectId.isValid(id) ? [{ _id: id }] : []),
+        { orderNumber: id },
+      ],
+    }).lean();
     return order || null;
   },
 
-  async createOrder(orderData: any) {
-    const db = ensureDataFile();
+  async trackOrder(orderNumber: string, phone: string) {
+    await ensureSeeded();
+    // Get last 10 digits of phone
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+    const order = await Order.findOne({
+      orderNumber: { $regex: new RegExp(`^${orderNumber}$`, 'i') },
+    }).lean();
 
-    // Verify stock availability
+    if (!order) return null;
+
+    const customerPhone = (order.customer?.phone || '').replace(/\D/g, '').slice(-10);
+    if (customerPhone !== cleanPhone) return null;
+
+    return order;
+  },
+
+  async createOrder(orderData: any) {
+    await ensureSeeded();
+
+    // Verify stock for each item
     for (const item of orderData.items) {
-      const product = db.products.find((p) => p._id === item.productId);
+      const product = await Product.findById(item.productId);
       if (!product) {
-        throw new Error(`Product not found: ${item.name}`);
+        throw new Error(`Product not found: ${item.productId}`);
       }
       if (product.stock < item.quantity) {
-        throw new Error(`Insufficient stock for ${item.name}. Available: ${product.stock}`);
+        throw new Error(`Insufficient stock for "${product.name}". Available: ${product.stock}, Requested: ${item.quantity}`);
       }
     }
 
-    const orderId = 'ord_' + Date.now();
-    const orderNumber = 'HC-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+    // Generate order number
+    const now = new Date();
+    const year = now.getFullYear();
+    const orderCount = await Order.countDocuments();
+    const orderNumber = `HC-${year}-${String(orderCount + 1).padStart(4, '0')}`;
 
-    const initialHistory = [
+    // Build status history
+    const statusHistory = [
       {
-        status: 'Order Placed',
+        status: orderData.status || 'Order Placed',
         timestamp: new Date(),
-        note: `Order placed online via ${orderData.payment?.method || 'Online'}`,
+        note: 'Order created',
         updatedBy: 'System',
       },
     ];
 
-    if (orderData.payment?.status === 'paid') {
-      initialHistory.push({
-        status: 'Payment Confirmed',
-        timestamp: new Date(),
-        note: `Payment verified via ${orderData.payment.method} - Transaction ID: ${orderData.payment.transactionId || orderData.payment.razorpayPaymentId}`,
-        updatedBy: 'Razorpay Gateway',
-      });
-    }
-
-    const newOrder = {
-      _id: orderId,
+    const order = await Order.create({
+      ...orderData,
       orderNumber,
-      customer: orderData.customer,
-      shippingAddress: orderData.shippingAddress,
-      billingAddress: orderData.billingAddress || orderData.shippingAddress,
-      items: orderData.items,
-      financials: orderData.financials,
-      payment: {
-        method: orderData.payment?.method || 'Razorpay',
-        transactionId: orderData.payment?.transactionId || '',
-        razorpayOrderId: orderData.payment?.razorpayOrderId || '',
-        razorpayPaymentId: orderData.payment?.razorpayPaymentId || '',
-        status: orderData.payment?.status || (orderData.payment?.method === 'Cash on Delivery' ? 'pending' : 'paid'),
-        paidAt: orderData.payment?.status === 'paid' ? new Date() : undefined,
-      },
-      status: orderData.payment?.status === 'paid' ? 'Payment Confirmed' : 'Order Placed',
-      tracking: {
-        courier: '',
-        trackingNumber: '',
-        trackingUrl: '',
-      },
-      statusHistory: initialHistory,
-      internalNotes: orderData.internalNotes || '',
-      createdAt: new Date(),
-    };
+      status: orderData.status || 'Order Placed',
+      statusHistory,
+    });
 
-    // Atomically reduce stock
+    // Reduce stock and create inventory logs
     for (const item of orderData.items) {
-      const pIndex = db.products.findIndex((p) => p._id === item.productId);
-      if (pIndex !== -1) {
-        const prod = db.products[pIndex];
-        const oldStock = prod.stock;
-        prod.stock -= item.quantity;
+      const product = await Product.findById(item.productId);
+      if (product) {
+        const previousStock = product.stock;
+        product.stock = Math.max(0, product.stock - item.quantity);
+        await product.save();
 
-        db.inventoryLogs.unshift({
-          _id: 'inv_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-          productId: prod._id,
-          productName: prod.name,
-          sku: prod.sku,
+        await InventoryLog.create({
+          productId: product._id.toString(),
+          productName: product.name,
+          sku: product.sku,
           changeType: 'ORDER_DEDUCT',
           quantityChanged: -item.quantity,
-          previousStock: oldStock,
-          newStock: prod.stock,
-          reason: `Stock deducted for Order #${orderNumber}`,
-          referenceId: orderNumber,
-          performedBy: 'Automated Checkout Engine',
-          createdAt: new Date(),
+          previousStock,
+          newStock: product.stock,
+          reason: `Order ${orderNumber}`,
+          referenceId: order._id.toString(),
+          performedBy: 'System',
         });
       }
     }
 
-    // Update customer spend stats if matching user
+    // Update user stats if email matches
     if (orderData.customer?.email) {
-      const user = db.users.find((u) => u.email.toLowerCase() === orderData.customer.email.toLowerCase());
-      if (user) {
-        user.totalSpent = (user.totalSpent || 0) + (orderData.financials?.total || 0);
-        user.totalOrders = (user.totalOrders || 0) + 1;
-      }
+      await User.findOneAndUpdate(
+        { email: orderData.customer.email.toLowerCase() },
+        {
+          $inc: {
+            totalSpent: orderData.financials?.total || 0,
+            totalOrders: 1,
+          },
+        }
+      );
     }
 
-    db.orders.unshift(newOrder);
-    persistDatabase();
-    return newOrder;
+    return order.toObject();
   },
 
   async updateOrderStatus(
@@ -585,440 +468,465 @@ export const Storage = {
     tracking?: { courier?: string; trackingNumber?: string; trackingUrl?: string },
     updatedBy: string = 'Admin'
   ) {
-    const db = ensureDataFile();
-    const order = db.orders.find((o) => o._id === orderId || o.orderNumber === orderId);
+    await ensureSeeded();
+    const order = await Order.findById(orderId);
     if (!order) return null;
 
     const previousStatus = order.status;
-    order.status = newStatus;
+    order.status = newStatus as any;
 
-    if (tracking) {
-      order.tracking = { ...order.tracking, ...tracking };
-      if (newStatus === 'Shipped' && !order.tracking.shippedAt) {
-        order.tracking.shippedAt = new Date();
-      }
-      if (newStatus === 'Delivered' && !order.tracking.deliveredAt) {
-        order.tracking.deliveredAt = new Date();
-      }
-    }
-
+    // Push to status history
     order.statusHistory.push({
       status: newStatus,
       timestamp: new Date(),
-      note: note || `Status updated from ${previousStatus} to ${newStatus}`,
+      note: note || '',
       updatedBy,
     });
 
-    // If order was cancelled or refunded, restore inventory atomically
+    // Update tracking fields
+    if (tracking) {
+      if (tracking.courier) order.tracking.courier = tracking.courier;
+      if (tracking.trackingNumber) order.tracking.trackingNumber = tracking.trackingNumber;
+      if (tracking.trackingUrl) order.tracking.trackingUrl = tracking.trackingUrl;
+    }
+
+    if (newStatus === 'Shipped') {
+      order.tracking.shippedAt = new Date();
+    }
+    if (newStatus === 'Delivered') {
+      order.tracking.deliveredAt = new Date();
+      order.payment.status = 'paid';
+      order.payment.paidAt = order.payment.paidAt || new Date();
+    }
+
+    // Restore stock if cancelled or returned
     if ((newStatus === 'Cancelled' || newStatus === 'Returned') && previousStatus !== 'Cancelled' && previousStatus !== 'Returned') {
       for (const item of order.items) {
-        const prod = db.products.find((p) => p._id === item.productId);
-        if (prod) {
-          const oldStock = prod.stock;
-          prod.stock += item.quantity;
+        const product = await Product.findById(item.productId);
+        if (product) {
+          const previousStock = product.stock;
+          product.stock += item.quantity;
+          await product.save();
 
-          db.inventoryLogs.unshift({
-            _id: 'inv_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-            productId: prod._id,
-            productName: prod.name,
-            sku: prod.sku,
+          await InventoryLog.create({
+            productId: product._id.toString(),
+            productName: product.name,
+            sku: product.sku,
             changeType: 'ORDER_RESTORE',
             quantityChanged: item.quantity,
-            previousStock: oldStock,
-            newStock: prod.stock,
-            reason: `Restored stock from ${newStatus} Order #${order.orderNumber}`,
-            referenceId: order.orderNumber,
+            previousStock,
+            newStock: product.stock,
+            reason: `Order ${order.orderNumber} ${newStatus.toLowerCase()}`,
+            referenceId: order._id.toString(),
             performedBy: updatedBy,
-            createdAt: new Date(),
           });
         }
       }
     }
 
-    persistDatabase();
-    return order;
+    await order.save();
+    return order.toObject();
   },
 
-  // INVENTORY
+  // ────────── Inventory ──────────
+
   async adjustInventory(
     productId: string,
     quantityChanged: number,
-    changeType: 'STOCK_IN' | 'STOCK_OUT' | 'DAMAGE_WRITE_OFF' | 'MANUAL_ADJUST',
+    changeType: string,
     reason: string,
     performedBy: string = 'Admin',
     supplierName?: string
   ) {
-    const db = ensureDataFile();
-    const prod = db.products.find((p) => p._id === productId);
-    if (!prod) throw new Error('Product not found');
+    await ensureSeeded();
+    const product = await Product.findById(productId);
+    if (!product) throw new Error('Product not found');
 
-    const previousStock = prod.stock;
-    const newStock = Math.max(0, previousStock + quantityChanged);
-    prod.stock = newStock;
+    const previousStock = product.stock;
+    product.stock = Math.max(0, previousStock + quantityChanged);
+    await product.save();
 
-    const logEntry = {
-      _id: 'inv_' + Date.now(),
-      productId: prod._id,
-      productName: prod.name,
-      sku: prod.sku,
+    const log = await InventoryLog.create({
+      productId: product._id.toString(),
+      productName: product.name,
+      sku: product.sku,
       changeType,
       quantityChanged,
       previousStock,
-      newStock,
+      newStock: product.stock,
       reason,
       supplierName: supplierName || '',
       performedBy,
-      createdAt: new Date(),
-    };
+    });
 
-    db.inventoryLogs.unshift(logEntry);
-    persistDatabase();
-    return { product: prod, log: logEntry };
+    return { product: product.toObject(), log: log.toObject() };
   },
 
   async getInventoryLogs(productId?: string) {
-    const db = ensureDataFile();
-    if (productId) {
-      return db.inventoryLogs.filter((l) => l.productId === productId);
-    }
-    return db.inventoryLogs;
+    await ensureSeeded();
+    const filter: any = {};
+    if (productId) filter.productId = productId;
+    return InventoryLog.find(filter).sort({ createdAt: -1 }).lean();
   },
 
-  // COUPONS
+  // ────────── Coupons ──────────
+
   async getCoupons() {
-    const db = ensureDataFile();
-    return db.coupons;
+    await ensureSeeded();
+    return Coupon.find().lean();
   },
 
   async validateCoupon(code: string, subtotal: number) {
-    const db = ensureDataFile();
-    const cleanCode = code.toUpperCase().trim();
-    const coupon = db.coupons.find((c) => c.code === cleanCode && c.isActive);
+    await ensureSeeded();
+    const coupon = await Coupon.findOne({
+      code: code.toUpperCase(),
+      isActive: true,
+    }).lean();
 
     if (!coupon) {
-      return { valid: false, message: 'Invalid or inactive coupon code.' };
+      return { valid: false, message: 'Invalid coupon code' };
     }
 
-    if (new Date() > new Date(coupon.expiryDate)) {
-      return { valid: false, message: 'This coupon has expired.' };
+    // Check expiry
+    if (coupon.expiryDate && new Date(coupon.expiryDate) < new Date()) {
+      return { valid: false, message: 'Coupon has expired' };
     }
 
-    if (subtotal < coupon.minOrderAmount) {
+    // Check minimum order amount
+    if (coupon.minOrderAmount && subtotal < coupon.minOrderAmount) {
       return {
         valid: false,
-        message: `Minimum order amount of ₹${coupon.minOrderAmount.toLocaleString('en-IN')} required for this coupon.`,
+        message: `Minimum order amount is ₹${coupon.minOrderAmount}`,
       };
     }
 
-    let discount = 0;
+    // Calculate discount
+    let discountAmount = 0;
     if (coupon.discountType === 'percentage') {
-      discount = (subtotal * coupon.discountValue) / 100;
-      if (coupon.maxDiscountAmount && discount > coupon.maxDiscountAmount) {
-        discount = coupon.maxDiscountAmount;
-      }
+      discountAmount = Math.round((subtotal * coupon.discountValue) / 100);
     } else {
-      discount = coupon.discountValue;
+      discountAmount = coupon.discountValue;
     }
 
-    discount = Math.min(discount, subtotal);
+    // Cap at maxDiscountAmount
+    if (coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount) {
+      discountAmount = coupon.maxDiscountAmount;
+    }
 
     return {
       valid: true,
       coupon,
-      discountAmount: Math.round(discount),
-      message: `Coupon ${coupon.code} applied! Saved ₹${Math.round(discount).toLocaleString('en-IN')}`,
+      discountAmount,
+      message: `Coupon applied! You save ₹${discountAmount}`,
     };
   },
 
   async createCoupon(data: any) {
-    const db = ensureDataFile();
-    const newCoupon = {
-      _id: 'coup_' + Date.now(),
-      code: data.code.toUpperCase().trim(),
-      discountType: data.discountType || 'percentage',
-      discountValue: Number(data.discountValue) || 10,
-      minOrderAmount: Number(data.minOrderAmount) || 0,
-      maxDiscountAmount: Number(data.maxDiscountAmount) || 0,
-      startDate: data.startDate ? new Date(data.startDate) : new Date(),
-      expiryDate: data.expiryDate ? new Date(data.expiryDate) : new Date(Date.now() + 30 * 86400000),
-      usageLimit: Number(data.usageLimit) || 100,
-      usedCount: 0,
-      perCustomerLimit: Number(data.perCustomerLimit) || 1,
-      isActive: data.isActive !== undefined ? !!data.isActive : true,
-      description: data.description || '',
-    };
-    db.coupons.push(newCoupon);
-    persistDatabase();
-    return newCoupon;
+    await ensureSeeded();
+    const coupon = await Coupon.create(data);
+    return coupon.toObject();
   },
 
   async deleteCoupon(id: string) {
-    const db = ensureDataFile();
-    db.coupons = db.coupons.filter((c) => c._id !== id);
-    persistDatabase();
-    return true;
+    await ensureSeeded();
+    const result = await Coupon.findByIdAndDelete(id);
+    return !!result;
   },
 
-  // USERS
+  // ────────── Users ──────────
+
   async getUserByEmail(email: string) {
-    const db = ensureDataFile();
-    return db.users.find((u) => u.email.toLowerCase() === email.toLowerCase().trim()) || null;
+    await ensureSeeded();
+    const user = await User.findOne({ email: email.toLowerCase() }).lean();
+    return user || null;
   },
 
   async getUserById(id: string) {
-    const db = ensureDataFile();
-    return db.users.find((u) => u._id === id) || null;
+    await ensureSeeded();
+    const user = await User.findById(id).lean();
+    return user || null;
   },
 
   async createUser(data: any) {
-    const db = ensureDataFile();
-    const existing = db.users.find((u) => u.email.toLowerCase() === data.email.toLowerCase().trim());
+    await ensureSeeded();
+    const existing = await User.findOne({ email: data.email.toLowerCase() }).lean();
     if (existing) {
-      throw new Error('An account with this email already exists.');
+      throw new Error('User with this email already exists');
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    const newUser = {
-      _id: 'usr_' + Date.now(),
-      name: data.name,
-      email: data.email.toLowerCase().trim(),
+    const user = await User.create({
+      ...data,
+      email: data.email.toLowerCase(),
       password: hashedPassword,
-      phone: data.phone || '',
-      role: data.role || 'customer',
-      isActive: true,
-      addresses: data.addresses || [],
-      wishlist: [],
-      totalSpent: 0,
-      totalOrders: 0,
-      createdAt: new Date(),
-    };
+    });
 
-    db.users.push(newUser);
-    persistDatabase();
-    return newUser;
+    return user.toObject();
   },
 
   async getStaff() {
-    const db = ensureDataFile();
-    return db.users
-      .filter((u) => u.role !== 'customer')
-      .map(({ password, ...rest }) => rest);
+    await ensureSeeded();
+    return User.find({ role: { $ne: 'customer' } })
+      .select('-password')
+      .lean();
   },
 
   async getCustomers() {
-    const db = ensureDataFile();
-    return db.users
-      .filter((u) => u.role === 'customer')
-      .map(({ password, ...rest }) => rest);
+    await ensureSeeded();
+    return User.find({ role: 'customer' })
+      .select('-password')
+      .lean();
   },
 
   async toggleUserStatus(userId: string) {
-    const db = ensureDataFile();
-    const user = db.users.find((u) => u._id === userId);
+    await ensureSeeded();
+    const user = await User.findById(userId);
     if (!user) return null;
     user.isActive = !user.isActive;
-    persistDatabase();
-    return user;
+    await user.save();
+    return user.toObject();
   },
 
-  // BANNERS
+  // ────────── Banners ──────────
+
   async getBanners() {
-    const db = ensureDataFile();
-    return db.banners.sort((a, b) => a.order - b.order);
+    await ensureSeeded();
+    return Banner.find().sort({ order: 1 }).lean();
   },
 
   async createBanner(data: any) {
-    const db = ensureDataFile();
-    const newBanner = {
-      _id: 'ban_' + Date.now(),
-      title: data.title,
-      subtitle: data.subtitle || '',
-      badge: data.badge || '',
-      image: data.image,
-      buttonText: data.buttonText || 'Shop Now',
-      link: data.link || '/products',
-      order: Number(data.order) || db.banners.length + 1,
-      isActive: data.isActive !== undefined ? !!data.isActive : true,
-    };
-    db.banners.push(newBanner);
-    persistDatabase();
-    return newBanner;
+    await ensureSeeded();
+    const banner = await Banner.create(data);
+    return banner.toObject();
   },
 
   async deleteBanner(id: string) {
-    const db = ensureDataFile();
-    db.banners = db.banners.filter((b) => b._id !== id);
-    persistDatabase();
-    return true;
+    await ensureSeeded();
+    const result = await Banner.findByIdAndDelete(id);
+    return !!result;
   },
 
-  // REVIEWS
+  // ────────── Reviews ──────────
+
   async getReviews(productId?: string) {
-    const db = ensureDataFile();
-    let list = [...db.reviews];
-    if (productId) {
-      list = list.filter((r) => r.productId === productId);
-    }
-    return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    await ensureSeeded();
+    const filter: any = {};
+    if (productId) filter.productId = productId;
+    return Review.find(filter).sort({ createdAt: -1 }).lean();
   },
 
   async createReview(data: any) {
-    const db = ensureDataFile();
-    const newReview = {
-      _id: 'rev_' + Date.now(),
-      productId: data.productId,
-      userId: data.userId || '',
-      customerName: data.customerName,
-      customerEmail: data.customerEmail,
-      rating: Number(data.rating) || 5,
-      title: data.title,
-      comment: data.comment,
-      isVerifiedPurchase: true,
-      status: 'approved',
-      adminReply: '',
-      createdAt: new Date(),
-    };
-    db.reviews.unshift(newReview);
+    await ensureSeeded();
+    const review = await Review.create(data);
 
-    // Update product rating and reviews count
-    const prod = db.products.find((p) => p._id === data.productId);
-    if (prod) {
-      const prodReviews = db.reviews.filter((r) => r.productId === data.productId);
-      const avg = prodReviews.reduce((sum, r) => sum + r.rating, 0) / prodReviews.length;
-      prod.rating = Number(avg.toFixed(1));
-      prod.numReviews = prodReviews.length;
+    // Recalculate product's average rating and numReviews
+    const agg = await Review.aggregate([
+      { $match: { productId: data.productId } },
+      {
+        $group: {
+          _id: '$productId',
+          avgRating: { $avg: '$rating' },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    if (agg.length > 0) {
+      await Product.findByIdAndUpdate(data.productId, {
+        rating: Math.round(agg[0].avgRating * 10) / 10,
+        numReviews: agg[0].count,
+      });
     }
 
-    persistDatabase();
-    return newReview;
+    return review.toObject();
   },
 
-  async updateReviewStatus(id: string, status: 'approved' | 'rejected', adminReply?: string) {
-    const db = ensureDataFile();
-    const review = db.reviews.find((r) => r._id === id);
+  async updateReviewStatus(id: string, status: string, adminReply?: string) {
+    await ensureSeeded();
+    const review = await Review.findById(id);
     if (!review) return null;
-    review.status = status;
+
+    review.status = status as any;
     if (adminReply !== undefined) {
       review.adminReply = adminReply;
     }
-    persistDatabase();
-    return review;
+    await review.save();
+    return review.toObject();
   },
 
-  // SETTINGS
+  // ────────── Settings ──────────
+
   async getSettings() {
-    const db = ensureDataFile();
-    return db.settings;
+    await ensureSeeded();
+    let settings = await Setting.findOne().lean();
+    if (!settings) {
+      settings = (await Setting.create(INITIAL_SETTINGS)).toObject();
+    }
+    return settings;
   },
 
   async updateSettings(updates: any) {
-    const db = ensureDataFile();
-    db.settings = { ...db.settings, ...updates };
-    persistDatabase();
-    return db.settings;
+    await ensureSeeded();
+    const settings = await Setting.findOneAndUpdate({}, updates, {
+      new: true,
+      upsert: true,
+    }).lean();
+    return settings;
   },
 
-  // DASHBOARD ANALYTICS & STATS
+  // ────────── Repair Inquiries ──────────
+
   async createRepairInquiry(inquiry: any) {
-    const db = ensureDataFile();
-    if (!(db as any).repairInquiries) (db as any).repairInquiries = [];
-    (db as any).repairInquiries.unshift(inquiry);
-    persistDatabase();
-    return inquiry;
+    await ensureSeeded();
+    const doc = await RepairInquiry.create(inquiry);
+    return doc.toObject();
   },
 
   async getRepairInquiries() {
-    const db = ensureDataFile();
-    return (db as any).repairInquiries || [];
+    await ensureSeeded();
+    return RepairInquiry.find().sort({ createdAt: -1 }).lean();
   },
 
-  async getDashboardStats() {
-    const db = ensureDataFile();
-    const orders = db.orders;
-    const products = db.products;
-    const customers = db.users.filter((u) => u.role === 'customer');
+  // ────────── Dashboard ──────────
 
-    const totalRevenue = orders
-      .filter((o) => o.status !== 'Cancelled')
-      .reduce((sum, o) => sum + (o.financials?.total || 0), 0);
+  async getDashboardStats() {
+    await ensureSeeded();
 
     const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const todayOrders = orders.filter((o) => new Date(o.createdAt) >= startOfToday && o.status !== 'Cancelled');
-    const todayRevenue = todayOrders.reduce((sum, o) => sum + (o.financials?.total || 0), 0);
+    // KPI aggregations
+    const [
+      totalRevenueAgg,
+      todayRevenueAgg,
+      monthlyRevenueAgg,
+      totalOrders,
+      pendingOrders,
+      completedOrders,
+      cancelledOrders,
+      totalCustomers,
+      totalProducts,
+      lowStockCount,
+      outOfStockCount,
+    ] = await Promise.all([
+      Order.aggregate([
+        { $match: { status: { $nin: ['Cancelled', 'Returned'] } } },
+        { $group: { _id: null, total: { $sum: '$financials.total' } } },
+      ]),
+      Order.aggregate([
+        { $match: { createdAt: { $gte: todayStart }, status: { $nin: ['Cancelled', 'Returned'] } } },
+        { $group: { _id: null, total: { $sum: '$financials.total' } } },
+      ]),
+      Order.aggregate([
+        { $match: { createdAt: { $gte: monthStart }, status: { $nin: ['Cancelled', 'Returned'] } } },
+        { $group: { _id: null, total: { $sum: '$financials.total' } } },
+      ]),
+      Order.countDocuments(),
+      Order.countDocuments({ status: { $in: ['Order Placed', 'Payment Confirmed', 'Processing'] } }),
+      Order.countDocuments({ status: 'Delivered' }),
+      Order.countDocuments({ status: 'Cancelled' }),
+      User.countDocuments({ role: 'customer' }),
+      Product.countDocuments(),
+      Product.countDocuments({ $expr: { $and: [{ $gt: ['$stock', 0] }, { $lte: ['$stock', '$lowStockThreshold'] }] } }),
+      Product.countDocuments({ stock: 0 }),
+    ]);
 
-    const monthOrders = orders.filter((o) => new Date(o.createdAt) >= startOfMonth && o.status !== 'Cancelled');
-    const monthlyRevenue = monthOrders.reduce((sum, o) => sum + (o.financials?.total || 0), 0);
+    // Low stock & out of stock products
+    const [lowStockProducts, outOfStockProducts] = await Promise.all([
+      Product.find({ $expr: { $and: [{ $gt: ['$stock', 0] }, { $lte: ['$stock', '$lowStockThreshold'] }] } })
+        .select('name sku stock lowStockThreshold images')
+        .limit(10)
+        .lean(),
+      Product.find({ stock: 0 })
+        .select('name sku stock images')
+        .limit(10)
+        .lean(),
+    ]);
 
-    const pendingOrdersCount = orders.filter((o) => ['Order Placed', 'Payment Confirmed', 'Processing'].includes(o.status)).length;
-    const completedOrdersCount = orders.filter((o) => o.status === 'Delivered').length;
-    const cancelledOrdersCount = orders.filter((o) => o.status === 'Cancelled' || o.status === 'Returned').length;
+    // Recent orders
+    const recentOrders = await Order.find()
+      .sort({ createdAt: -1 })
+      .limit(7)
+      .lean();
 
-    const lowStockProducts = products.filter((p) => p.stock > 0 && p.stock <= p.lowStockThreshold);
-    const outOfStockProducts = products.filter((p) => p.stock === 0);
+    // Daily chart data (last 7 days)
+    const sevenDaysAgo = new Date(todayStart);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
 
-    // Sales by category
-    const categorySalesMap: Record<string, { count: number; revenue: number }> = {};
-    orders
-      .filter((o) => o.status !== 'Cancelled')
-      .forEach((order) => {
-        order.items?.forEach((item: any) => {
-          const prod = products.find((p) => p._id === item.productId);
-          const cat = prod?.category || 'general';
-          if (!categorySalesMap[cat]) {
-            categorySalesMap[cat] = { count: 0, revenue: 0 };
-          }
-          categorySalesMap[cat].count += item.quantity;
-          categorySalesMap[cat].revenue += item.total || item.price * item.quantity;
-        });
-      });
+    const dailyAgg = await Order.aggregate([
+      { $match: { createdAt: { $gte: sevenDaysAgo }, status: { $nin: ['Cancelled', 'Returned'] } } },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+          },
+          revenue: { $sum: '$financials.total' },
+          orders: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
 
-    // Recent 7 days sales breakdown for chart
-    const dailyChartData = [];
+    // Build full 7-day chart data
+    const dailyChartData: { date: string; revenue: number; orders: number }[] = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
+      const d = new Date(todayStart);
       d.setDate(d.getDate() - i);
-      const dayStr = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-      const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
-
-      const dayMatches = orders.filter((o) => {
-        const oDate = new Date(o.createdAt);
-        return oDate >= dayStart && oDate <= dayEnd && o.status !== 'Cancelled';
-      });
-
-      const dayRev = dayMatches.reduce((sum, o) => sum + (o.financials?.total || 0), 0);
+      const dateStr = d.toISOString().split('T')[0];
+      const found = dailyAgg.find((a: any) => a._id === dateStr);
       dailyChartData.push({
-        date: dayStr,
-        revenue: dayRev,
-        orders: dayMatches.length,
+        date: dateStr,
+        revenue: found ? found.revenue : 0,
+        orders: found ? found.orders : 0,
       });
     }
 
+    // Category sales
+    const categorySales = await Order.aggregate([
+      { $match: { status: { $nin: ['Cancelled', 'Returned'] } } },
+      { $unwind: '$items' },
+      {
+        $lookup: {
+          from: 'products',
+          let: { pid: '$items.productId' },
+          pipeline: [
+            { $match: { $expr: { $eq: [{ $toString: '$_id' }, '$$pid'] } } },
+            { $project: { category: 1 } },
+          ],
+          as: 'productInfo',
+        },
+      },
+      { $unwind: { path: '$productInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: { $ifNull: ['$productInfo.category', 'Unknown'] },
+          totalSales: { $sum: '$items.total' },
+          totalQuantity: { $sum: '$items.quantity' },
+        },
+      },
+      { $sort: { totalSales: -1 } },
+    ]);
+
     return {
       kpi: {
-        totalRevenue,
-        todayRevenue,
-        monthlyRevenue,
-        totalOrders: orders.length,
-        pendingOrders: pendingOrdersCount,
-        completedOrders: completedOrdersCount,
-        cancelledOrders: cancelledOrdersCount,
-        totalCustomers: customers.length,
-        totalProducts: products.length,
-        lowStockCount: lowStockProducts.length,
-        outOfStockCount: outOfStockProducts.length,
+        totalRevenue: totalRevenueAgg[0]?.total || 0,
+        todayRevenue: todayRevenueAgg[0]?.total || 0,
+        monthlyRevenue: monthlyRevenueAgg[0]?.total || 0,
+        totalOrders,
+        pendingOrders,
+        completedOrders,
+        cancelledOrders,
+        totalCustomers,
+        totalProducts,
+        lowStockCount,
+        outOfStockCount,
       },
       lowStockProducts,
       outOfStockProducts,
-      recentOrders: orders.slice(0, 7),
+      recentOrders,
       dailyChartData,
-      categorySales: Object.entries(categorySalesMap).map(([category, val]) => ({
-        category,
-        ...val,
-      })),
+      categorySales,
     };
   },
 };

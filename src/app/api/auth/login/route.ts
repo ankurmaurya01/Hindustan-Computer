@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     }
 
     const token = signToken({
-      userId: user._id,
+      userId: String(user._id),
       name: user.name,
       email: user.email,
       role: user.role,
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       success: true,
       token,
       user: {
-        id: user._id,
+        id: String(user._id),
         name: user.name,
         email: user.email,
         phone: user.phone,
