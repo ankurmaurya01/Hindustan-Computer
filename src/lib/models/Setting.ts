@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export interface ISetting extends Document {
+export interface ISetting extends Document<string> {
+  _id: string;
   storeName: string;
   tagline: string;
   phone: string;
@@ -35,6 +36,7 @@ export interface ISetting extends Document {
 
 const SettingSchema = new Schema<ISetting>(
   {
+    _id: { type: String, default: 'store_settings' },
     storeName: { type: String, default: 'Hindustan Computer' },
     tagline: { type: String, default: "India's Premier Gaming & IT Hardware Destination" },
     phone: { type: String, default: '+91 99359 08565' },

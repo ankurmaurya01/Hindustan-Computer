@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export interface IInventoryLog extends Document {
+export interface IInventoryLog extends Document<string> {
+  _id: string;
   productId: string;
   productName: string;
   sku: string;
@@ -17,6 +18,7 @@ export interface IInventoryLog extends Document {
 
 const InventoryLogSchema = new Schema<IInventoryLog>(
   {
+    _id: { type: String, default: () => 'inv_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6) },
     productId: { type: String, required: true },
     productName: { type: String, required: true },
     sku: { type: String, required: true },

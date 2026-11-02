@@ -17,7 +17,8 @@ export interface IOrderStatusHistory {
   updatedBy?: string;
 }
 
-export interface IOrder extends Document {
+export interface IOrder extends Document<string> {
+  _id: string;
   orderNumber: string;
   customer: {
     userId?: string;
@@ -82,6 +83,7 @@ export interface IOrder extends Document {
 
 const OrderSchema = new Schema<IOrder>(
   {
+    _id: { type: String, default: () => 'ord_' + Date.now() },
     orderNumber: { type: String, required: true, unique: true },
     customer: {
       userId: { type: String },

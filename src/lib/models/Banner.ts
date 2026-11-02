@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export interface IBanner extends Document {
+export interface IBanner extends Document<string> {
+  _id: string;
   title: string;
   subtitle: string;
   badge?: string;
@@ -15,6 +16,7 @@ export interface IBanner extends Document {
 
 const BannerSchema = new Schema<IBanner>(
   {
+    _id: { type: String, default: () => 'ban_' + Date.now() },
     title: { type: String, required: true },
     subtitle: { type: String, default: '' },
     badge: { type: String, default: '' },

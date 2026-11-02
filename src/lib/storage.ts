@@ -23,7 +23,8 @@ import {
 
 // ─── RepairInquiry model (defined inline) ────────────────────────────────────
 
-interface IRepairInquiry extends Document {
+interface IRepairInquiry extends Document<string> {
+  _id: string;
   deviceType: string;
   problem: string;
   details: string;
@@ -35,6 +36,7 @@ interface IRepairInquiry extends Document {
 
 const RepairInquirySchema = new Schema<IRepairInquiry>(
   {
+    _id: { type: String, default: () => 'rep_' + Date.now() },
     deviceType: { type: String, required: true },
     problem: { type: String, required: true },
     details: { type: String, default: '' },
@@ -67,6 +69,7 @@ async function ensureSeeded(): Promise<void> {
     const adminPassword = process.env.ADMIN_PASSWORD || '9935908565';
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
     await User.create({
+      _id: 'usr_superadmin',
       name: 'Admin',
       email: adminEmail,
       password: hashedPassword,
@@ -201,7 +204,7 @@ export const Storage = {
   async getProductById(id: string) {
     await ensureSeeded();
     const product = await Product.findOne({
-      $or: [{ slug: id }, ...(mongoose.Types.ObjectId.isValid(id) ? [{ _id: id }] : [])],
+      $or: [{ _id: id }, { slug: id }],
     }).lean();
     return product || null;
   },
@@ -209,13 +212,16 @@ export const Storage = {
   async getProductBySlug(slug: string) {
     await ensureSeeded();
     const product = await Product.findOne({
-      $or: [{ slug }, ...(mongoose.Types.ObjectId.isValid(slug) ? [{ _id: slug }] : [])],
+      $or: [{ slug }, { _id: slug }],
     }).lean();
     return product || null;
   },
 
   async createProduct(data: any) {
     await ensureSeeded();
+    if (!data._id) {
+      data._id = 'prod_' + Date.now();
+    }
     if (!data.slug) {
       data.slug = generateSlug(data.name);
     }
@@ -300,13 +306,16 @@ export const Storage = {
   async getCategoryBySlug(slug: string) {
     await ensureSeeded();
     const category = await Category.findOne({
-      $or: [{ slug }, ...(mongoose.Types.ObjectId.isValid(slug) ? [{ _id: slug }] : [])],
+      $or: [{ slug }, { _id: slug }],
     }).lean();
     return category || null;
   },
 
   async createCategory(data: any) {
     await ensureSeeded();
+    if (!data._id) {
+      data._id = 'cat_' + Date.now();
+    }
     if (!data.slug) {
       data.slug = generateSlug(data.name);
     }
@@ -416,6 +425,7 @@ export const Storage = {
     ];
 
     const order = await Order.create({
+      _id: orderData._id || 'ord_' + Date.now(),
       ...orderData,
       orderNumber,
       status: orderData.status || 'Order Placed',
@@ -623,6 +633,9 @@ export const Storage = {
 
   async createCoupon(data: any) {
     await ensureSeeded();
+    if (!data._id) {
+      data._id = 'coup_' + Date.now();
+    }
     const coupon = await Coupon.create(data);
     return coupon.toObject();
   },
@@ -656,6 +669,7 @@ export const Storage = {
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const user = await User.create({
+      _id: data._id || 'usr_' + Date.now(),
       ...data,
       email: data.email.toLowerCase(),
       password: hashedPassword,
@@ -696,6 +710,9 @@ export const Storage = {
 
   async createBanner(data: any) {
     await ensureSeeded();
+    if (!data._id) {
+      data._id = 'ban_' + Date.now();
+    }
     const banner = await Banner.create(data);
     return banner.toObject();
   },
@@ -758,7 +775,7 @@ export const Storage = {
 
   async getSettings() {
     await ensureSeeded();
-    let settings = await Setting.findOne().lean();
+    let settings: any = await Setting.findOne().lean();
     if (!settings) {
       settings = (await Setting.create(INITIAL_SETTINGS)).toObject();
     }
@@ -778,6 +795,9 @@ export const Storage = {
 
   async createRepairInquiry(inquiry: any) {
     await ensureSeeded();
+    if (!inquiry._id) {
+      inquiry._id = 'rep_' + Date.now();
+    }
     const doc = await RepairInquiry.create(inquiry);
     return doc.toObject();
   },
