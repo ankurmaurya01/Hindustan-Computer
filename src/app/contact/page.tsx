@@ -55,7 +55,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <strong className="block text-slate-900 dark:text-white mb-0.5">Physical Shop Location:</strong>
-                    <span>Dohrighat Road, Near Bus Stand, Dohrighat, Uttar Pradesh - 275303</span>
+                    <a href="https://maps.app.goo.gl/QrpkQuvfyPWnit8E9" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Dohrighat Road, Near Bus Stand, Dohrighat, UP - 275303 ↗</a>
                   </div>
                 </div>
 

@@ -70,7 +70,7 @@ export default function Footer() {
             <span className="font-extrabold text-lg text-white">HINDUSTAN COMPUTER</span>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Your trusted local computer and IT hardware showroom. We specialize in custom gaming PCs, laptops, graphics cards, processors, and authorized repairs at wholesale market prices.
+            Your trusted local computer shop in Dohrighat. We provide computer & laptop repair, Windows installation, virus removal, printer ink, toners, keyboards, mouse, monitors, SSDs, and all computer accessories.
           </p>
           <div className="text-xs text-slate-400 space-y-1">
             <p><strong className="text-white">GSTIN:</strong> </p>
@@ -80,14 +80,14 @@ export default function Footer() {
 
         {/* Col 2: Categories */}
         <div>
-          <h3 className="text-white font-bold text-sm mb-3">Popular Categories</h3>
+          <h3 className="text-white font-bold text-sm mb-3">Shop Categories & Services</h3>
           <ul className="space-y-2 text-xs">
-            <li><Link href="/category/laptops" className="hover:text-blue-400 transition">Gaming & Business Laptops</Link></li>
-            <li><Link href="/category/gaming-pcs" className="hover:text-blue-400 transition">Custom Pre-built Gaming Rigs</Link></li>
-            <li><Link href="/category/graphics-cards-gpu" className="hover:text-blue-400 transition">NVIDIA RTX 40 Series GPUs</Link></li>
-            <li><Link href="/category/processors-cpu" className="hover:text-blue-400 transition">Intel Core & AMD Ryzen CPUs</Link></li>
-            <li><Link href="/category/computer-monitors" className="hover:text-blue-400 transition">High Refresh Gaming Monitors</Link></li>
-            <li><Link href="/category/ssd-and-hdd" className="hover:text-blue-400 transition">PCIe Gen4/Gen5 NVMe SSDs</Link></li>
+            <li><Link href="/category/keyboards" className="hover:text-blue-400 transition">Keyboards & Optical Mouse</Link></li>
+            <li><Link href="/category/printers" className="hover:text-blue-400 transition">Printer Inks & 88A/12A Toners</Link></li>
+            <li><Link href="/category/computer-monitors" className="hover:text-blue-400 transition">Computer Monitors (Lapcare / Acer)</Link></li>
+            <li><Link href="/category/ssd-and-hdd" className="hover:text-blue-400 transition">SSD Upgrades (128GB / 256GB / 512GB)</Link></li>
+            <li><Link href="/category/computer-accessories" className="hover:text-blue-400 transition">Cables, Adapters & Laptop Chargers</Link></li>
+            <li><Link href="/contact" className="hover:text-blue-400 transition">Computer & Laptop Repair (Windows ₹200)</Link></li>
           </ul>
         </div>
 
@@ -131,7 +131,7 @@ export default function Footer() {
       {/* Bottom Copyright & Payment Methods */}
       <div className="border-t border-slate-800 py-4 bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-          <p>&copy; {new Date().getFullYear()} Hindustan Computer. All rights reserved. Made for Indian PC Gamers & Creators.</p>
+          <p>&copy; {new Date().getFullYear()} Hindustan Computer. All rights reserved. Computer Sales, Repair & IT Services • Dohrighat, Uttar Pradesh.</p>
           <div className="flex items-center gap-2">
             <span className="bg-slate-800 px-2 py-0.5 rounded text-[11px] text-slate-300 font-mono">UPI / GPay / PhonePe</span>
             <span className="bg-slate-800 px-2 py-0.5 rounded text-[11px] text-slate-300 font-mono">RuPay</span>

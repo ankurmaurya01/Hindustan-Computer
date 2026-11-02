@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, ShieldCheck, Mail, ArrowRight, Store } from 'lucide-react';
+import { Lock, ShieldCheck, User, ArrowRight, Store } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
@@ -10,8 +10,8 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState('admin@hindustancomputer.com');
-  const [password, setPassword] = useState('Admin@12345');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -21,11 +21,11 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const res = await login(email, password, true);
+      const res = await login(username, password, true);
       if (res.success) {
         router.push('/admin');
       } else {
-        setErrorMsg(res.message || 'Invalid shopkeeper credentials.');
+        setErrorMsg(res.message || 'Invalid credentials. Please try again.');
       }
     } catch (err: any) {
       setErrorMsg('Login failed. Please check your credentials.');
@@ -58,17 +58,18 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-bold mb-1">Shopkeeper Email</label>
+            <label className="block text-slate-300 font-bold mb-1">Username</label>
             <div className="relative">
               <input
-                type="email"
+                type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@hindustancomputer.com"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="admin"
+                autoComplete="username"
                 className="w-full pl-9 pr-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
               />
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             </div>
           </div>
 
@@ -81,16 +82,11 @@ export default function AdminLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
+                autoComplete="current-password"
                 className="w-full pl-9 pr-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
               />
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             </div>
-          </div>
-
-          <div className="p-3 bg-blue-950/40 border border-blue-900/60 rounded-xl text-[11px] text-blue-300 space-y-1">
-            <span className="font-bold block text-blue-200">Default Shopkeeper Login:</span>
-            <p>Email: <code className="text-white bg-slate-800 px-1 rounded">admin@hindustancomputer.com</code></p>
-            <p>Password: <code className="text-white bg-slate-800 px-1 rounded">Admin@12345</code></p>
           </div>
 
           <button

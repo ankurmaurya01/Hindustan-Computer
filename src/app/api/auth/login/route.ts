@@ -7,12 +7,16 @@ export async function POST(req: NextRequest) {
     const { email, password, adminOnly } = await req.json();
 
     if (!email || !password) {
-      return NextResponse.json({ message: 'Email and password are required' }, { status: 400 });
+      return NextResponse.json({ message: 'Username and password are required' }, { status: 400 });
     }
 
-    const user = await Storage.getUserByEmail(email);
+    // Allow "admin" as a shortcut username for the superadmin account
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@hindustancomputer.com';
+    const resolvedEmail = email.trim().toLowerCase() === 'admin' ? adminEmail : email.trim();
+
+    const user = await Storage.getUserByEmail(resolvedEmail);
     if (!user) {
-      return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
+      return NextResponse.json({ message: 'Invalid username or password' }, { status: 401 });
     }
 
     if (!user.isActive) {
@@ -21,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
-      return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
+      return NextResponse.json({ message: 'Invalid username or password' }, { status: 401 });
     }
 
     if (adminOnly && user.role === 'customer') {

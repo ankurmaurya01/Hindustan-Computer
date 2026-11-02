@@ -61,7 +61,7 @@ const SettingSchema = new Schema<ISetting>(
     },
     announcement: {
       type: String,
-      default: '⚡ Mega Tech Sale: Flat 10% Off on Gaming Rigs | Free Express Delivery across India on orders above ₹1,999 | Call/WhatsApp: +91 99359 08565',
+      default: '📞 Computer repair, Windows installation, printer ink & accessories | WhatsApp: +91 99359 08565 | Dohrighat, UP',
     },
     returnPolicy: { type: String, default: '' },
     privacyPolicy: { type: String, default: '' },

@@ -130,7 +130,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal === 0 ? 0 : subtotal >= freeShippingThreshold ? 0 : standardShipping;
+  // Store Pickup only — zero delivery or shipping fees
+  const shipping = 0;
   const gst = Math.round((subtotal * 18) / 118); // 18% included GST
   const finalDiscount = Math.min(discount, subtotal);
   const total = Math.max(0, subtotal - finalDiscount + shipping);

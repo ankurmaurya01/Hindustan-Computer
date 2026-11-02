@@ -12,9 +12,16 @@ import {
   CategoryData,
 } from './initialData';
 
-// Local storage path for local file persistence
-const DATA_DIR = path.join(process.cwd(), 'data');
+// Vercel: filesystem is read-only except /tmp. We use /tmp for writes when
+// the normal data directory is not writable (serverless / Vercel environment).
+const IS_VERCEL = process.env.VERCEL === '1' || process.env.VERCEL_ENV !== undefined;
+const DATA_DIR = IS_VERCEL
+  ? '/tmp/hindustan_data'
+  : path.join(process.cwd(), 'data');
 const DB_FILE = path.join(DATA_DIR, 'hindustan_db.json');
+
+// Seed file shipped with the repo (read-only source of truth for categories/banners/coupons)
+const SEED_FILE = path.join(process.cwd(), 'data', 'hindustan_db.json');
 
 interface LocalDatabase {
   users: any[];
@@ -28,132 +35,93 @@ interface LocalDatabase {
   settings: any;
 }
 
-// In-memory cache backed by JSON file
+// In-memory cache (survives within a single serverless invocation)
 let memoryDb: LocalDatabase | null = null;
+
+function buildFreshDb(): LocalDatabase {
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@hindustancomputer.com';
+  const adminPassword = process.env.ADMIN_PASSWORD || '9935908565';
+  const defaultPasswordHash = bcrypt.hashSync(adminPassword, 10);
+
+  const settings = {
+    ...INITIAL_SETTINGS,
+    email: process.env.NEXT_PUBLIC_STORE_EMAIL || INITIAL_SETTINGS.email,
+    phone: process.env.NEXT_PUBLIC_STORE_PHONE || INITIAL_SETTINGS.phone,
+    whatsapp: (process.env.NEXT_PUBLIC_STORE_WHATSAPP || INITIAL_SETTINGS.whatsapp).replace('+', ''),
+    address: process.env.NEXT_PUBLIC_STORE_ADDRESS || INITIAL_SETTINGS.address,
+  };
+
+  return {
+    users: [
+      {
+        _id: 'usr_superadmin',
+        name: 'Administrator',
+        email: adminEmail,
+        password: defaultPasswordHash,
+        phone: settings.phone,
+        role: 'superadmin',
+        isActive: true,
+        addresses: [],
+        wishlist: [],
+        totalSpent: 0,
+        totalOrders: 0,
+        createdAt: new Date(),
+      },
+    ],
+    products: [...INITIAL_PRODUCTS],
+    categories: [...INITIAL_CATEGORIES],
+    orders: [...INITIAL_ORDERS],
+    coupons: [...INITIAL_COUPONS],
+    banners: [...INITIAL_BANNERS],
+    reviews: [],
+    inventoryLogs: INITIAL_PRODUCTS.map((p) => ({
+      _id: 'inv_' + Math.random().toString(36).substring(2, 9),
+      productId: p._id,
+      productName: p.name,
+      sku: p.sku,
+      changeType: 'STOCK_IN',
+      quantityChanged: p.stock,
+      previousStock: 0,
+      newStock: p.stock,
+      reason: 'Initial Warehouse Inward Consignment',
+      performedBy: 'Administrator',
+      createdAt: new Date(),
+    })),
+    settings,
+  };
+}
 
 function ensureDataFile(): LocalDatabase {
   if (memoryDb) {
     return memoryDb;
   }
 
+  // 1. Try reading from writable DB_FILE (local dev or /tmp on Vercel)
   try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-
     if (fs.existsSync(DB_FILE)) {
       const raw = fs.readFileSync(DB_FILE, 'utf-8');
       memoryDb = JSON.parse(raw);
       return memoryDb!;
     }
   } catch (err) {
-    console.warn('Error reading db file, seeding fresh:', err);
+    console.warn('Could not read writable DB file, will try seed:', err);
   }
 
-  // Initial seed
-  const defaultPasswordHash = bcrypt.hashSync('Admin@12345', 10);
-  const customerPasswordHash = bcrypt.hashSync('Customer@123', 10);
+  // 2. On local dev, also try reading from the committed seed file
+  if (!IS_VERCEL) {
+    try {
+      if (fs.existsSync(SEED_FILE)) {
+        const raw = fs.readFileSync(SEED_FILE, 'utf-8');
+        memoryDb = JSON.parse(raw);
+        return memoryDb!;
+      }
+    } catch (err) {
+      console.warn('Could not read seed file, building fresh DB:', err);
+    }
+  }
 
-  const initialUsers = [
-    {
-      _id: 'usr_superadmin',
-      name: 'Super Administrator',
-      email: 'admin@hindustancomputer.com',
-      password: defaultPasswordHash,
-      phone: '+91 99359 08565',
-      role: 'superadmin',
-      isActive: true,
-      addresses: [],
-      wishlist: [],
-      totalSpent: 0,
-      totalOrders: 0,
-      createdAt: new Date(),
-    },
-    {
-      _id: 'usr_prod_mgr',
-      name: 'Rajesh Kumar (Product Manager)',
-      email: 'products@hindustancomputer.com',
-      password: defaultPasswordHash,
-      phone: '+91 98765 43211',
-      role: 'product_manager',
-      isActive: true,
-      addresses: [],
-      wishlist: [],
-      totalSpent: 0,
-      totalOrders: 0,
-      createdAt: new Date(),
-    },
-    {
-      _id: 'usr_order_mgr',
-      name: 'Ananya Sen (Order Manager)',
-      email: 'orders@hindustancomputer.com',
-      password: defaultPasswordHash,
-      phone: '+91 98765 43212',
-      role: 'order_manager',
-      isActive: true,
-      addresses: [],
-      wishlist: [],
-      totalSpent: 0,
-      totalOrders: 0,
-      createdAt: new Date(),
-    },
-    {
-      _id: 'usr_customer_demo',
-      name: 'Vikramaditya Sharma',
-      email: 'customer@gmail.com',
-      password: customerPasswordHash,
-      phone: '+91 98112 34567',
-      role: 'customer',
-      isActive: true,
-      addresses: [
-        {
-          fullName: 'Vikramaditya Sharma',
-          phone: '+91 98112 34567',
-          addressLine1: 'Tower B, Flat 904, Cyber Heights Apartments',
-          addressLine2: 'Sector 62',
-          landmark: 'Near Metro Station',
-          city: 'Noida',
-          state: 'Uttar Pradesh',
-          pinCode: '201309',
-          isDefault: true,
-        },
-      ],
-      wishlist: [],
-      totalSpent: 0,
-      totalOrders: 0,
-      createdAt: new Date(),
-    },
-  ];
-
-  const initialInventoryLogs = INITIAL_PRODUCTS.map((p) => ({
-    _id: 'inv_' + Math.random().toString(36).substring(2, 9),
-    productId: p._id,
-    productName: p.name,
-    sku: p.sku,
-    changeType: 'STOCK_IN',
-    quantityChanged: p.stock,
-    previousStock: 0,
-    newStock: p.stock,
-    reason: 'Initial Warehouse Inward Consignment',
-    supplierName: 'Official Authorized National Distributor',
-    performedBy: 'Super Administrator',
-    createdAt: new Date(),
-  }));
-
-  const initialReviews: any[] = [];
-
-  memoryDb = {
-    users: initialUsers,
-    products: INITIAL_PRODUCTS,
-    categories: INITIAL_CATEGORIES,
-    orders: INITIAL_ORDERS,
-    coupons: INITIAL_COUPONS,
-    banners: INITIAL_BANNERS,
-    reviews: initialReviews,
-    inventoryLogs: initialInventoryLogs,
-    settings: INITIAL_SETTINGS,
-  };
-
+  // 3. Build a fresh DB from initialData
+  memoryDb = buildFreshDb();
   persistDatabase();
   return memoryDb;
 }
@@ -166,7 +134,11 @@ function persistDatabase() {
     }
     fs.writeFileSync(DB_FILE, JSON.stringify(memoryDb, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Failed to write database file:', err);
+    // On Vercel: writes go to /tmp and are scoped to this invocation only.
+    // Data added via admin panel persists within the same serverless function
+    // instance but resets when a new instance starts. For permanent storage,
+    // connect a database (MongoDB Atlas / Vercel KV).
+    console.warn('DB write failed (expected on read-only FS):', (err as Error).message);
   }
 }
 
@@ -947,6 +919,19 @@ export const Storage = {
   },
 
   // DASHBOARD ANALYTICS & STATS
+  async createRepairInquiry(inquiry: any) {
+    const db = ensureDataFile();
+    if (!(db as any).repairInquiries) (db as any).repairInquiries = [];
+    (db as any).repairInquiries.unshift(inquiry);
+    persistDatabase();
+    return inquiry;
+  },
+
+  async getRepairInquiries() {
+    const db = ensureDataFile();
+    return (db as any).repairInquiries || [];
+  },
+
   async getDashboardStats() {
     const db = ensureDataFile();
     const orders = db.orders;

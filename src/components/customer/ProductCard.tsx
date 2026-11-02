@@ -24,7 +24,7 @@ export default function ProductCard({ product }: { product: any }) {
   const handleWhatsAppOrder = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const msg = `Hello Hindustan Computer, I am interested in buying: *${product.name}* (Price: ₹${product.sellingPrice.toLocaleString('en-IN')}). Is it currently available for delivery?`;
+    const msg = `Hello Hindustan Computer! I want to check stock availability for: *${product.name}* (Price: ₹${product.sellingPrice.toLocaleString('en-IN')}). Is this in stock so I can pick it up from your Dohrighat shop?`;
     window.open(`https://wa.me/919935908565?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -121,7 +121,7 @@ export default function ProductCard({ product }: { product: any }) {
           {product.stock > 0 ? (
             <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              {product.stock <= 3 ? `Only ${product.stock} Left in Shop!` : 'In Stock (Ready to Dispatch)'}
+              {product.stock <= 3 ? `Only ${product.stock} Left in Shop!` : 'In Stock at Dohrighat Shop'}
             </span>
           ) : (
             <span className="text-red-500 font-medium">Out of Stock</span>
@@ -158,7 +158,7 @@ export default function ProductCard({ product }: { product: any }) {
         <button
           onClick={handleWhatsAppOrder}
           className="flex items-center justify-center gap-1 py-2 px-2 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-bold transition"
-          title="Direct WhatsApp Order with Shopkeeper"
+          title="Check Stock & Store Availability on WhatsApp"
         >
           <MessageCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span>WhatsApp</span>

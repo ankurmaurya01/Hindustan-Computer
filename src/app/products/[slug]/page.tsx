@@ -20,6 +20,7 @@ import {
   Plus,
   Minus,
   MapPin,
+  Store,
   Clock,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
@@ -120,7 +121,7 @@ export default function ProductDetailPage() {
 
   const handleWhatsAppInquiry = () => {
     if (!product) return;
-    const msg = `Hello Hindustan Computer, I am interested in purchasing: *${product.name}* (Price: ₹${product.sellingPrice.toLocaleString('en-IN')}). SKU: ${product.sku}. Please let me know if it is available for delivery.`;
+    const msg = `Hello Hindustan Computer! I want to check stock availability for: *${product.name}* (Price: ₹${product.sellingPrice.toLocaleString('en-IN')}). Can I pick this up from your Dohrighat shop?`;
     window.open(`https://wa.me/919935908565?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -308,42 +309,26 @@ export default function ProductDetailPage() {
               {product.stock > 0 ? (
                 <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  In Stock in Shop ({product.stock} units ready to dispatch)
+                  In Stock at Dohrighat Shop ({product.stock} units available)
                 </span>
               ) : (
                 <span className="text-red-500 font-bold">Currently Out of Stock</span>
               )}
             </div>
 
-            {/* PIN Code Delivery Checker */}
-            <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-blue-600" />
-                Check Delivery Date to Your PIN Code:
+            {/* In-Store Pickup Location Box */}
+            <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 space-y-2 text-xs">
+              <span className="font-bold text-blue-900 dark:text-blue-300 flex items-center gap-1.5 uppercase text-[11px] tracking-wider">
+                <Store className="w-4 h-4 text-blue-600" />
+                Store Pickup Only (दुकान से संग्रह):
               </span>
-              <form onSubmit={handleCheckPin} className="flex gap-2">
-                <input
-                  type="text"
-                  maxLength={6}
-                  placeholder="Enter 6-digit Indian PIN (e.g. 275303)"
-                  value={pinCode}
-                  onChange={(e) => setPinCode(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-1 focus:ring-blue-600"
-                />
-                <button
-                  type="submit"
-                  disabled={pinLoading}
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition"
-                >
-                  {pinLoading ? 'Checking...' : 'Check'}
-                </button>
-              </form>
-
-              {pinResult && (
-                <div className={`text-xs p-2 rounded-xl mt-1 ${pinResult.available ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300' : 'bg-red-50 text-red-600'}`}>
-                  {pinResult.message}
-                </div>
-              )}
+              <p className="text-slate-700 dark:text-slate-300">
+                Collect directly from <strong>Hindustan Computer</strong>, Dohrighat Road, Near Bus Stand, Dohrighat, UP - 275303.
+              </p>
+              <div className="text-[11px] text-slate-500 flex flex-wrap gap-3 pt-1">
+                <span>⏱️ Mon – Sat: 10:30 AM to 8:30 PM</span>
+                <span>📞 Call/WhatsApp: +91 99359 08565</span>
+              </div>
             </div>
 
             {/* Quantity Selector + Action Buttons */}

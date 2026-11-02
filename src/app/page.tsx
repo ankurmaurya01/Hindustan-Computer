@@ -5,18 +5,16 @@ import Link from 'next/link';
 import Header from '@/components/customer/Header';
 import Footer from '@/components/customer/Footer';
 import ProductCard from '@/components/customer/ProductCard';
+import RepairInquiry from '@/components/customer/RepairInquiry';
 import {
   Laptop,
   Monitor,
-  Gamepad2,
   Cpu,
   Layers,
   HardDrive,
   Keyboard,
   Printer,
   ChevronRight,
-  Flame,
-  Clock,
   Sparkles,
   PhoneCall,
   MessageCircle,
@@ -26,6 +24,11 @@ import {
   ArrowRight,
   Package,
   PlusCircle,
+  ShieldAlert,
+  Settings,
+  Disc,
+  MapPin,
+  CheckCircle,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -35,27 +38,12 @@ export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Countdown timer for Deals of the day
-  const [timeLeft, setTimeLeft] = useState({ hours: 14, minutes: 22, seconds: 48 });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
-        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return { hours: 23, minutes: 59, seconds: 59 };
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   // Fetch initial data
   useEffect(() => {
     async function loadData() {
       try {
         const [prodRes, catRes, banRes] = await Promise.all([
-          fetch('/api/products?limit=20'),
+          fetch('/api/products?limit=24'),
           fetch('/api/categories'),
           fetch('/api/banners'),
         ]);
@@ -81,39 +69,34 @@ export default function HomePage() {
     if (banners.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % banners.length);
-    }, 5000);
+    }, 5500);
     return () => clearInterval(interval);
   }, [banners.length]);
-
-  const featuredGamingRigs = products.filter(
-    (p) => p.category === 'gaming-pcs' || p.category === 'graphics-cards-gpu'
-  );
-  const bestsellers = products.filter((p) => p.isBestseller).slice(0, 8);
-  const newArrivals = products.filter((p) => p.isNewArrival || p.isFeatured).slice(0, 8);
 
   // Category Icon Mapper
   const getCatIcon = (slug: string) => {
     switch (slug) {
       case 'laptops': return <Laptop className="w-6 h-6" />;
       case 'desktop-computers': return <Monitor className="w-6 h-6" />;
-      case 'gaming-pcs': return <Gamepad2 className="w-6 h-6" />;
-      case 'processors-cpu': return <Cpu className="w-6 h-6" />;
-      case 'graphics-cards-gpu': return <Layers className="w-6 h-6" />;
+      case 'computer-monitors': return <Monitor className="w-6 h-6" />;
       case 'ssd-and-hdd': return <HardDrive className="w-6 h-6" />;
       case 'keyboards': return <Keyboard className="w-6 h-6" />;
+      case 'mouse': return <Keyboard className="w-6 h-6" />;
       case 'printers': return <Printer className="w-6 h-6" />;
+      case 'motherboards': return <Layers className="w-6 h-6" />;
+      case 'power-supply-smps': return <Cpu className="w-6 h-6" />;
       default: return <Cpu className="w-6 h-6" />;
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
       <Header />
 
       <main className="flex-1 space-y-10 pb-16">
         {/* Hero Banner Slider */}
         <section className="max-w-7xl mx-auto px-4 pt-4">
-          <div className="relative overflow-hidden rounded-3xl bg-slate-900 aspect-21/9 md:aspect-24/9 min-h-[320px] shadow-2xl flex items-center">
+          <div className="relative overflow-hidden rounded-3xl bg-slate-900 aspect-21/9 md:aspect-24/9 min-h-[300px] shadow-xl flex items-center">
             {banners.length > 0 ? (
               banners.map((slide, idx) => (
                 <div
@@ -128,7 +111,7 @@ export default function HomePage() {
                     alt={slide.title}
                     className="absolute inset-0 w-full h-full object-cover object-center filter brightness-50"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-transparent" />
 
                   {/* Slide Content */}
                   <div className="relative z-20 max-w-xl p-6 md:p-12 space-y-3">
@@ -141,32 +124,32 @@ export default function HomePage() {
                     <h1 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
                       {slide.title}
                     </h1>
-                    <p className="text-sm md:text-base text-slate-300 line-clamp-2">
+                    <p className="text-xs md:text-sm text-slate-300 line-clamp-2">
                       {slide.subtitle}
                     </p>
                     <div className="pt-2 flex flex-wrap gap-3">
                       <Link
                         href={slide.link || '/products'}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-lg hover:shadow-blue-500/25 transition"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs md:text-sm rounded-xl shadow-lg transition"
                       >
-                        <span>{slide.buttonText || 'Shop Now'}</span>
+                        <span>{slide.buttonText || 'Browse Shop'}</span>
                         <ArrowRight className="w-4 h-4" />
                       </Link>
                       <a
-                        href="https://wa.me/919935908565?text=Hi%20Hindustan%20Computer,%20I%20want%20to%20inquire%20about%20your%20current%20offers"
+                        href="https://wa.me/919935908565?text=Hi%20Hindustan%20Computer,%20I%20have%20an%20inquiry%20regarding%20products%20or%20repair%20services."
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-sm rounded-xl backdrop-blur-md transition"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs md:text-sm rounded-xl backdrop-blur-md transition"
                       >
                         <MessageCircle className="w-4 h-4 text-emerald-400" />
-                        <span>Ask on WhatsApp</span>
+                        <span>Chat on WhatsApp</span>
                       </a>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="p-12 text-white">Loading promotions...</div>
+              <div className="p-12 text-white">Loading shop details...</div>
             )}
 
             {/* Slider Dots */}
@@ -194,26 +177,26 @@ export default function HomePage() {
                 <Shield className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Authorized Dealer</h4>
-                <p className="text-[11px] text-slate-500">100% genuine brand warranty</p>
+                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Genuine Parts</h4>
+                <p className="text-[11px] text-slate-500">Keyboards, SSDs, inks & cables</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-2">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <Truck className="w-5 h-5" />
+                <Wrench className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Free Express Delivery</h4>
-                <p className="text-[11px] text-slate-500">On all orders above ₹1,999</p>
+                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Expert Repair</h4>
+                <p className="text-[11px] text-slate-500">Fast laptop & PC diagnostics</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-2">
               <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                <Wrench className="w-5 h-5" />
+                <Disc className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Custom PC Assembly</h4>
-                <p className="text-[11px] text-slate-500">Free cable-management & test</p>
+                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Windows Setup</h4>
+                <p className="text-[11px] text-slate-500">OS installation from ₹200</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-2">
@@ -221,27 +204,115 @@ export default function HomePage() {
                 <PhoneCall className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Direct Shop Support</h4>
+                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Direct Support</h4>
                 <p className="text-[11px] text-slate-500">Talk directly to shopkeeper</p>
               </div>
             </div>
           </div>
         </section>
 
+
+        {/* Our Computer Services (Reflecting https://hindustan-computer.netlify.app/) */}
+        <section className="max-w-7xl mx-auto px-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-1">
+                  <Wrench className="w-3.5 h-3.5" />
+                  Service & Maintenance
+                </div>
+                <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">
+                  Our Computer & Laptop Services
+                </h2>
+                <p className="text-xs text-slate-500 max-w-xl">
+                  We offer reliable and affordable IT solutions for home, student, shop billing, and office computers in Dohrighat.
+                </p>
+              </div>
+              <a
+                href="https://wa.me/919935908565?text=Hi%20Hindustan%20Computer,%20I%20need%20help%20with%20a%20computer%20service%20request."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition shrink-0"
+              >
+                <MessageCircle className="w-4 h-4 fill-current" />
+                <span>Request Service on WhatsApp</span>
+              </a>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Service 1: Repair */}
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold">
+                  <Wrench className="w-5 h-5" />
+                </div>
+                <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                  Repair Services
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Troubleshooting, screen & hinge repairs, hardware replacements, and software fixes for all major brands.
+                </p>
+              </div>
+
+              {/* Service 2: Virus Removal */}
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold">
+                  <ShieldAlert className="w-5 h-5" />
+                </div>
+                <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                  Virus & Malware Removal
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Deep system cleaning, malware protection, PC speed-up, and data recovery assistance.
+                </p>
+              </div>
+
+              {/* Service 3: Custom Builds */}
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+                  <Monitor className="w-5 h-5" />
+                </div>
+                <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                  Desktop PC Assembly
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Tailored budget desktop assembly for home study, office, shop billing, and everyday usage.
+                </p>
+              </div>
+
+              {/* Service 4: Windows Installation */}
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold">
+                  <Disc className="w-5 h-5" />
+                </div>
+                <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                  Windows Installation
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Fresh Windows OS installation, driver setup, and essential software configuration. Starting at ₹200.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+                {/* Can It Be Repaired? Interactive Inquiry Tool */}
+        <RepairInquiry />
+
         {/* Shop by Popular Categories */}
         <section className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Shop by Category
+                Browse Shop by Category
               </h2>
-              <p className="text-xs text-slate-500">Explore computer hardware, peripherals, and systems</p>
+              <p className="text-xs text-slate-500">Keyboards, mice, printer inks, storage, cables & components</p>
             </div>
             <Link
               href="/products"
               className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
             >
-              <span>View All 25 Categories</span>
+              <span>View All Products</span>
               <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
@@ -277,12 +348,12 @@ export default function HomePage() {
                   Inventory Under Preparation
                 </h3>
                 <p className="text-xs md:text-sm text-slate-500 leading-relaxed">
-                  We are updating our store catalog with brand-new products and fresh stock. Browse our categories, visit our showroom, or contact us directly on WhatsApp!
+                  We are updating our store catalog with fresh accessories and stock. Browse our categories, visit our shop, or message us directly on WhatsApp!
                 </p>
               </div>
               <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                 <a
-                  href="https://wa.me/919935908565?text=Hi%20Hindustan%20Computer,%20I%20am%20looking%20for%20computer%20hardware"
+                  href="https://wa.me/919935908565?text=Hi%20Hindustan%20Computer,%20I%20am%20looking%20for%20computer%20accessories"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-2"
@@ -302,140 +373,64 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* Hot Deals of the Day (Countdown Timer) */}
-        {bestsellers.length > 0 && (
-          <section className="max-w-7xl mx-auto px-4">
-            <div className="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 rounded-3xl p-6 text-white shadow-xl mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
-                  <Flame className="w-8 h-8 text-amber-300 animate-pulse" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold tracking-widest uppercase text-amber-200">
-                    Flash Discount Sale
-                  </span>
-                  <h3 className="text-xl md:text-2xl font-black">Today's Mega Tech Deals</h3>
-                  <p className="text-xs text-rose-100">Special prices directly negotiated with manufacturers</p>
-                </div>
-              </div>
-
-              {/* Countdown Box */}
-              <div className="flex items-center gap-2 font-mono text-sm font-bold bg-black/30 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/20">
-                <Clock className="w-4 h-4 text-amber-300" />
-                <span>Ends in:</span>
-                <span className="bg-black/50 px-2 py-1 rounded text-amber-300">
-                  {String(timeLeft.hours).padStart(2, '0')}h
-                </span>
-                :
-                <span className="bg-black/50 px-2 py-1 rounded text-amber-300">
-                  {String(timeLeft.minutes).padStart(2, '0')}m
-                </span>
-                :
-                <span className="bg-black/50 px-2 py-1 rounded text-amber-300">
-                  {String(timeLeft.seconds).padStart(2, '0')}s
-                </span>
-              </div>
-            </div>
-
-            {/* Deals Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {bestsellers.slice(0, 4).map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Custom PC Build Banner for Shopkeeper */}
+        {/* Normal Budget Desktop PC Assembly Banner */}
         <section className="max-w-7xl mx-auto px-4">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-navy via-slate-900 to-blue-950 p-6 md:p-10 border border-blue-900/40 shadow-xl">
-            <div className="relative z-10 max-w-2xl space-y-4">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-6 md:p-10 border border-blue-900/40 shadow-xl">
+            <div className="relative z-10 max-w-2xl space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase">
-                <Gamepad2 className="w-4 h-4" />
-                Custom Gaming Rig Builder
+                <Monitor className="w-4 h-4" />
+                Custom Desktop Assembly
               </div>
               <h3 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
-                Want a Custom PC Build Within Your Budget?
+                Need a Desktop PC for Home, Office, or Study?
               </h3>
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Tell us your budget (e.g. ₹50,000, ₹1 Lakh, or ₹2.5 Lakhs) and what games or software you use (GTA V, Valorant, 3D Blender, Video Editing). Our senior technician will assemble, wire, and stress-test your rig with zero assembly charges!
+              <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
+                Tell us your budget (e.g. ₹12,000, ₹18,000, or ₹25,000) and requirement (Shop billing, Tally, student study, CSC center, or internet browsing). We assemble tested desktop PCs with warranty, monitors, and accessories!
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
                 <a
-                  href="https://wa.me/919935908565?text=Hi%20Hindustan%20Computer,%20I%20want%20to%20get%20a%20quotation%20for%20a%20custom%20PC%20build.%20My%20budget%20is%20₹"
+                  href="https://wa.me/919935908565?text=Hi%20Hindustan%20Computer,%20I%20want%20to%20get%20a%20quotation%20for%20an%20assembled%20desktop%20PC.%20My%20budget%20is%20₹"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl shadow-lg transition"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs md:text-sm rounded-xl shadow-lg transition"
                 >
                   <MessageCircle className="w-5 h-5 fill-current" />
                   <span>Get Free PC Quotation on WhatsApp</span>
                 </a>
                 <Link
-                  href="/category/gaming-pcs"
-                  className="inline-flex items-center gap-2 px-5 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-xl transition border border-slate-700"
+                  href="/products"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs md:text-sm rounded-xl transition border border-slate-700"
                 >
-                  <span>View Ready Prebuilt PCs</span>
+                  <span>Browse All Products</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
-
-            {/* Decorative background circle */}
             <div className="absolute -right-16 -bottom-16 w-80 h-80 rounded-full bg-blue-600/10 blur-3xl pointer-events-none" />
           </div>
         </section>
 
-        {/* Featured Gaming PCs & GPUs */}
+        {/* Available Products Grid (when items are added) */}
         {products.length > 0 && (
           <section className="max-w-7xl mx-auto px-4">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                  <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                    High-Performance Gaming PCs & GPUs
-                  </h2>
-                </div>
-                <p className="text-xs text-slate-500">Ultra-fast framerates for 1080p, 1440p, and 4K raytracing</p>
-              </div>
-              <Link
-                href="/category/gaming-pcs"
-                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-              >
-                <span>View All Gaming Rigs</span>
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {featuredGamingRigs.length > 0
-                ? featuredGamingRigs.map((product) => <ProductCard key={product._id} product={product} />)
-                : products.slice(0, 4).map((product) => <ProductCard key={product._id} product={product} />)}
-            </div>
-          </section>
-        )}
-
-        {/* New Arrivals & Best-Selling Hardware */}
-        {newArrivals.length > 0 && (
-          <section className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
                 <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                  New Arrivals & Trending Products
+                  Available in Store
                 </h2>
-                <p className="text-xs text-slate-500">Fresh stock just arrived at our store</p>
+                <p className="text-xs text-slate-500">Genuine computer peripherals and accessories</p>
               </div>
               <Link
                 href="/products"
                 className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
               >
-                <span>Explore All Products</span>
+                <span>View Full Catalog</span>
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {newArrivals.map((product) => (
+              {products.slice(0, 8).map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
             </div>
@@ -446,33 +441,39 @@ export default function HomePage() {
         <section className="max-w-7xl mx-auto px-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
             <div className="space-y-2 text-center md:text-left">
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
-                Visit Our Physical Store
+              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest flex items-center justify-center md:justify-start gap-1">
+                <MapPin className="w-4 h-4" />
+                Visit Our Local Shop
               </span>
               <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white">
-                Want to See & Test Products Before Buying?
+                Visit Hindustan Computer in Dohrighat
               </h3>
               <p className="text-xs text-slate-500 max-w-lg">
-                Visit our retail showroom at <strong>Dohrighat Road, Near Bus Stand, Dohrighat, UP - 275303</strong>. Try out mechanical keyboards, gaming monitors, and test laptops in person!
+                Located at <strong>Dohrighat Road, Near Bus Stand, Dohrighat, UP - 275303</strong>. Buy keyboards, mouse, printer inks, SSDs, cables, laptop chargers, or bring your computer for quick servicing!
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-              <Link
-                href="/contact"
-                className="px-5 py-2.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold rounded-xl text-center hover:opacity-90 transition"
+              <a
+                href="https://maps.app.goo.gl/QrpkQuvfyPWnit8E9"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-2.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold rounded-xl text-center hover:opacity-90 transition flex items-center justify-center gap-1.5"
               >
-                Store Location & Directions
-              </Link>
+                <MapPin className="w-4 h-4 text-red-500" />
+                <span>Google Maps Location</span>
+              </a>
               <a
                 href="tel:+919935908565"
-                className="px-5 py-2.5 bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-slate-700 text-xs font-bold rounded-xl text-center hover:bg-blue-100 transition"
+                className="px-5 py-2.5 bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-slate-700 text-xs font-bold rounded-xl text-center hover:bg-blue-100 transition flex items-center justify-center gap-1.5"
               >
-                Call Shop: +91 99359 08565
+                <PhoneCall className="w-4 h-4" />
+                <span>Call: +91 99359 08565</span>
               </a>
             </div>
           </div>
         </section>
+
       </main>
 
       <Footer />

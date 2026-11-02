@@ -129,7 +129,7 @@ Thank you for shopping with Hindustan Computer!`;
 
         {/* Status Filters Bar */}
         <div className="flex flex-wrap gap-1.5 text-xs">
-          {['all', 'Order Placed', 'Processing', 'Packed', 'Shipped', 'Delivered', 'Cancelled'].map((st) => (
+          {['all', 'Pickup Requested', 'Stock Confirmed', 'Ready for Pickup', 'Collected & Paid', 'Out of Stock', 'Cancelled'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
@@ -247,22 +247,20 @@ Thank you for shopping with Hindustan Computer!`;
                         value={order.status}
                         onChange={(e) => handleStatusChange(order._id, e.target.value)}
                         className={`text-xs font-bold px-2 py-1.5 rounded-xl border focus:outline-none cursor-pointer ${
-                          order.status === 'Delivered'
+                          order.status === 'Collected & Paid'
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                            : order.status === 'Shipped'
+                            : order.status === 'Ready for Pickup' || order.status === 'Stock Confirmed'
                             ? 'bg-blue-50 text-blue-700 border-blue-300'
-                            : order.status === 'Cancelled'
+                            : order.status === 'Cancelled' || order.status === 'Out of Stock'
                             ? 'bg-red-50 text-red-700 border-red-300'
                             : 'bg-amber-50 text-amber-700 border-amber-300'
                         }`}
                       >
-                        <option value="Order Placed">Order Placed</option>
-                        <option value="Payment Confirmed">Payment Confirmed</option>
-                        <option value="Processing">Processing</option>
-                        <option value="Packed">Packed</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Out for Delivery">Out for Delivery</option>
-                        <option value="Delivered">Delivered</option>
+                        <option value="Pickup Requested">Pickup Requested</option>
+                        <option value="Stock Confirmed">Stock Confirmed</option>
+                        <option value="Ready for Pickup">Ready for Pickup</option>
+                        <option value="Collected & Paid">Collected & Paid</option>
+                        <option value="Out of Stock">Out of Stock</option>
                         <option value="Cancelled">Cancelled</option>
                       </select>
                     </td>

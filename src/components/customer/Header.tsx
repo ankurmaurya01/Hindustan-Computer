@@ -91,7 +91,7 @@ export default function Header() {
               Official Store
             </span>
             <span className="truncate">
-              ⚡ 100% Genuine Hardware &bull; GST Bill &bull; Brand Warranty &bull; Free Delivery above ₹1,999
+              📍 Store Pickup at Dohrighat Shop &bull; Check Stock on WhatsApp &bull; Computer & Laptop Repair
             </span>
           </div>
           <div className="flex items-center gap-4 text-slate-300">
@@ -280,33 +280,26 @@ export default function Header() {
             <Link href="/products" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
               All Products
             </Link>
-            <Link href="/category/laptops" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
-              Laptops
+            <Link href="/category/keyboards" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
+              Keyboards & Mouse
             </Link>
-            <Link href="/category/gaming-pcs" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-              Gaming PCs
-            </Link>
-            <Link href="/category/graphics-cards-gpu" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
-              Graphics Cards (GPU)
-            </Link>
-            <Link href="/category/processors-cpu" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
-              Processors (CPU)
+            <Link href="/category/printers" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
+              Printers & Ink
             </Link>
             <Link href="/category/computer-monitors" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
               Monitors
             </Link>
             <Link href="/category/ssd-and-hdd" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
-              SSD & HDD
+              SSD & Storage
             </Link>
-            <Link href="/category/keyboards" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
-              Keyboards & Mouse
+            <Link href="/category/computer-accessories" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
+              Accessories
             </Link>
-            <Link href="/category/printers" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
-              Printers
+            <Link href="/category/cables-and-connectors" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
+              Cables & Adapters
             </Link>
             <Link href="/contact" className="text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">
-              Contact Shop
+              Repair & Services
             </Link>
           </div>
 
@@ -338,14 +331,14 @@ export default function Header() {
             <Link href="/products" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded">
               All Products
             </Link>
-            <Link href="/category/gaming-pcs" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded">
-              Gaming PCs & Rigs
+            <Link href="/category/keyboards" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded">
+              Keyboards & Mouse
             </Link>
-            <Link href="/category/laptops" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded">
-              Laptops
+            <Link href="/category/printers" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded">
+              Printers & Ink
             </Link>
-            <Link href="/category/graphics-cards-gpu" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded">
-              Graphics Cards (GPU)
+            <Link href="/category/computer-accessories" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded">
+              Computer Accessories & Cables
             </Link>
             <Link href="/track-order" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded">
               Track My Order

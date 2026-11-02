@@ -7,12 +7,13 @@ import Footer from '@/components/customer/Footer';
 import Link from 'next/link';
 import {
   CheckCircle,
-  Truck,
   Printer,
   MessageCircle,
-  ArrowRight,
-  ShieldCheck,
-  PackageCheck,
+  MapPin,
+  Clock,
+  Store,
+  PhoneCall,
+  ShoppingBag,
 } from 'lucide-react';
 
 export default function OrderSuccessPage() {
@@ -45,17 +46,17 @@ export default function OrderSuccessPage() {
 
   const handleWhatsAppNotify = () => {
     if (!order) return;
-    const msg = `Hello Hindustan Computer, I just placed an order on your website! 
-*Order ID:* ${order.orderNumber}
-*Customer Name:* ${order.customer?.name}
-*Total Amount:* ₹${order.financials?.total.toLocaleString('en-IN')}
-*Payment Method:* ${order.payment?.method}
-Please confirm and arrange dispatch. Thank you!`;
+    const msg = `*Store Pickup Request - Hindustan Computer*
+*Order Ref:* ${order.orderNumber}
+*Customer:* ${order.customer?.name} (${order.customer?.phone})
+*Total Amount:* ₹${order.financials?.total?.toLocaleString('en-IN')}
+
+Hello Hindustan Computer, I submitted a pickup request for these items. Please confirm stock availability so I can come and collect them from the shop.`;
     window.open(`https://wa.me/919935908565?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
       <div className="no-print">
         <Header />
       </div>
@@ -67,21 +68,22 @@ Please confirm and arrange dispatch. Thank you!`;
             <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 animate-bounce">
               <CheckCircle className="w-10 h-10" />
             </div>
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-600">
-              Order Confirmed & Received
+            <span className="text-xs font-bold uppercase tracking-widest text-emerald-600 flex items-center justify-center gap-1">
+              <Store className="w-4 h-4" />
+              Pickup Request Registered
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-              Thank You For Your Order!
+              Thank You! Your Pickup Request is Placed
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
-              Your order has been safely registered at Hindustan Computer. A confirmation invoice is ready.
+              We have noted your items. Please visit our shop in Dohrighat to inspect and collect your products.
             </p>
           </div>
 
           {/* Order Details Badge */}
           <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl flex flex-wrap items-center justify-between gap-4 text-xs">
             <div>
-              <span className="text-slate-400 block">Order Number</span>
+              <span className="text-slate-400 block">Pickup Token / Ref #</span>
               <strong className="text-sm font-mono text-blue-600 dark:text-blue-400">
                 {order?.orderNumber || orderId}
               </strong>
@@ -89,15 +91,39 @@ Please confirm and arrange dispatch. Thank you!`;
             <div>
               <span className="text-slate-400 block">Status</span>
               <span className="inline-flex items-center gap-1 font-bold text-emerald-600">
-                <PackageCheck className="w-4 h-4" />
-                {order?.status || 'Order Placed'}
+                <Store className="w-4 h-4" />
+                {order?.status || 'Pickup Requested'}
               </span>
             </div>
             <div>
-              <span className="text-slate-400 block">Payment Method</span>
+              <span className="text-slate-400 block">Payment Mode</span>
               <strong className="text-slate-800 dark:text-slate-200">
-                {order?.payment?.method || 'Cash on Delivery'}
+                Pay at Shop Counter (Cash / UPI)
               </strong>
+            </div>
+          </div>
+
+          {/* Shop Location Banner for Pickup */}
+          <div className="p-5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 rounded-2xl space-y-2 text-xs">
+            <span className="font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider text-[11px] flex items-center gap-1">
+              <MapPin className="w-4 h-4 text-blue-600" />
+              Store Pickup Location:
+            </span>
+            <p className="text-slate-800 dark:text-slate-200 font-bold">
+              Hindustan Computer
+            </p>
+            <p className="text-slate-600 dark:text-slate-400">
+              Dohrighat Road, Near Bus Stand, Dohrighat, Uttar Pradesh - 275303
+            </p>
+            <div className="flex flex-wrap items-center gap-4 pt-1 text-slate-500">
+              <span className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-amber-500" />
+                Mon – Sat: 10:30 AM to 8:30 PM
+              </span>
+              <span className="flex items-center gap-1">
+                <PhoneCall className="w-3.5 h-3.5 text-blue-500" />
+                Call: +91 99359 08565
+              </span>
             </div>
           </div>
 
@@ -108,30 +134,30 @@ Please confirm and arrange dispatch. Thank you!`;
               className="flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>Send Receipt to Shopkeeper on WhatsApp</span>
+              <span>Confirm Stock with Shopkeeper on WhatsApp</span>
             </button>
             <button
               onClick={handlePrint}
               className="flex items-center justify-center gap-2 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl transition border border-slate-300 dark:border-slate-700"
             >
               <Printer className="w-4 h-4" />
-              <span>Print Tax Invoice Bill</span>
+              <span>Print Pickup Slip</span>
             </button>
           </div>
 
           {/* Items Summary Table */}
           {order && (
             <div className="space-y-4 pt-4 border-t">
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white">Items in this Order</h3>
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white">Items to Collect</h3>
               <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
                 {order.items?.map((item: any, idx: number) => (
                   <div key={idx} className="py-2.5 flex justify-between items-center">
                     <div>
                       <p className="font-bold text-slate-800 dark:text-slate-200">{item.name}</p>
-                      <p className="text-slate-400">Qty: {item.quantity} &times; ₹{item.price.toLocaleString('en-IN')}</p>
+                      <p className="text-slate-400">Qty: {item.quantity} &times; ₹{item.price?.toLocaleString('en-IN')}</p>
                     </div>
                     <span className="font-extrabold text-slate-900 dark:text-white">
-                      ₹{item.total.toLocaleString('en-IN')}
+                      ₹{item.total?.toLocaleString('en-IN')}
                     </span>
                   </div>
                 ))}
@@ -141,7 +167,7 @@ Please confirm and arrange dispatch. Thank you!`;
               <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>₹{order.financials?.subtotal.toLocaleString('en-IN')}</span>
+                  <span>₹{order.financials?.subtotal?.toLocaleString('en-IN')}</span>
                 </div>
                 {order.financials?.discount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-bold">
@@ -150,43 +176,33 @@ Please confirm and arrange dispatch. Thank you!`;
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>Delivery Charge:</span>
-                  <span>{order.financials?.shipping === 0 ? 'FREE' : `₹${order.financials?.shipping}`}</span>
+                  <span>Fulfillment:</span>
+                  <span className="text-emerald-600 font-bold">In-Store Pickup (FREE)</span>
                 </div>
                 <div className="flex justify-between font-black text-sm text-slate-900 dark:text-white border-t pt-2">
-                  <span>Total Payable:</span>
-                  <span className="text-blue-600 dark:text-blue-400">₹{order.financials?.total.toLocaleString('en-IN')}</span>
+                  <span>Payable at Store:</span>
+                  <span className="text-blue-600 dark:text-blue-400">₹{order.financials?.total?.toLocaleString('en-IN')}</span>
                 </div>
-              </div>
-
-              {/* Delivery Address */}
-              <div className="text-xs space-y-1">
-                <span className="font-bold text-slate-500 uppercase tracking-wider text-[10px]">
-                  Shipping To:
-                </span>
-                <p className="font-bold text-slate-800 dark:text-slate-200">{order.shippingAddress?.fullName} ({order.shippingAddress?.phone})</p>
-                <p className="text-slate-600 dark:text-slate-400">
-                  {order.shippingAddress?.addressLine1}, {order.shippingAddress?.landmark && `${order.shippingAddress.landmark}, `}
-                  {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.pinCode}
-                </p>
               </div>
             </div>
           )}
 
           {/* Links */}
           <div className="no-print pt-4 border-t flex flex-wrap items-center justify-between gap-3 text-xs">
-            <Link
-              href={`/track-order?orderNumber=${order?.orderNumber || orderId}`}
+            <a
+              href="https://maps.app.goo.gl/QrpkQuvfyPWnit8E9"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-bold hover:underline"
             >
-              <Truck className="w-4 h-4" />
-              <span>Track Live Order Status &rarr;</span>
-            </Link>
+              <MapPin className="w-4 h-4 text-red-500" />
+              <span>Get Directions to Store on Google Maps &rarr;</span>
+            </a>
             <Link
-              href="/"
-              className="text-slate-500 hover:text-slate-800 dark:hover:text-white font-medium"
+              href="/products"
+              className="text-slate-600 dark:text-slate-300 font-semibold hover:underline"
             >
-              Continue Shopping &rarr;
+              &larr; Back to Products
             </Link>
           </div>
         </div>

@@ -6,19 +6,19 @@ import { Save, CheckCircle2, Store, Phone, MessageCircle, MapPin, Truck } from '
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<any>({
     storeName: 'Hindustan Computer',
-    tagline: "India's Premier Gaming & IT Hardware Destination",
+    tagline: 'Your Trusted IT Partner – Sales, Service & Accessories',
     phone: '+91 99359 08565',
     whatsapp: '+919935908565',
     email: 'contact@hindustancomputer.com',
     gstin: '',
-    address: 'Dohrighat Road, Near Bus Stand, Dohrighat',
+    address: 'Dohrighat Road, Near Bus Stand',
     city: 'Dohrighat',
     state: 'Uttar Pradesh',
     pincode: '275303',
     shippingCharge: 99,
     freeShippingThreshold: 1999,
     enableCod: true,
-    announcement: '⚡ Mega Tech Sale: Flat 10% Off on Gaming Rigs | Free Express Delivery across India on orders above ₹1,999 | Call/WhatsApp: +91 99359 08565',
+    announcement: '📞 Genuine parts, expert repair & accessories | WhatsApp: +91 99359 08565 | Dohrighat, UP',
   });
 
   const [loading, setLoading] = useState(true);

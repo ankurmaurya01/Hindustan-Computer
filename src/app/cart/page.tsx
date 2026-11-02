@@ -14,8 +14,9 @@ import {
   ArrowRight,
   Tag,
   ShieldCheck,
-  Truck,
-  RotateCcw,
+  MapPin,
+  MessageCircle,
+  Store,
 } from 'lucide-react';
 
 export default function CartPage() {
@@ -26,10 +27,7 @@ export default function CartPage() {
     subtotal,
     discount,
     couponCode,
-    shipping,
     total,
-    freeShippingThreshold,
-    freeShippingProgress,
     removeItem,
     updateQuantity,
     applyCoupon,
@@ -52,29 +50,32 @@ export default function CartPage() {
     if (res.success) setInputCoupon('');
   };
 
-  const remaining = Math.max(0, freeShippingThreshold - subtotal);
-
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
       <Header />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">
-          Shopping Cart ({itemCount} {itemCount === 1 ? 'item' : 'items'})
-        </h1>
+        <div className="mb-4">
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
+            Store Pickup Cart ({itemCount} {itemCount === 1 ? 'item' : 'items'})
+          </h1>
+          <p className="text-xs text-slate-500">
+            Items added here are reserved for pickup directly from our shop in Dohrighat.
+          </p>
+        </div>
 
         {items.length === 0 ? (
           <div className="text-center py-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 space-y-4 shadow-sm">
             <div className="w-16 h-16 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
               <ShoppingBag className="w-8 h-8" />
             </div>
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Your shopping cart is empty</h2>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Your pickup cart is empty</h2>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Check out our latest laptops, gaming desktop rigs, GPUs, processors, and computer accessories.
+              Browse our keyboards, mice, printer inks, SSDs, cables, and accessories to prepare your store pickup list.
             </p>
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow"
             >
               <span>Explore Products</span>
               <ArrowRight className="w-4 h-4" />
@@ -84,37 +85,27 @@ export default function CartPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Left Items Table (8 cols) */}
             <div className="lg:col-span-8 space-y-4">
-              {/* Free delivery tracker */}
-              <div className="p-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 rounded-2xl text-xs space-y-2">
-                <div className="flex items-center gap-2 font-semibold text-blue-900 dark:text-blue-300">
-                  <Truck className="w-4 h-4 text-blue-600" />
-                  {remaining > 0 ? (
-                    <span>
-                      Add <strong>₹{remaining.toLocaleString('en-IN')}</strong> more to your cart to qualify for <strong>Free Express Shipping</strong>!
-                    </span>
-                  ) : (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                      🎉 Congratulations! You have unlocked Free Express Shipping across India.
-                    </span>
-                  )}
+              {/* In-Store Pickup Banner */}
+              <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-2xl text-xs space-y-1">
+                <div className="flex items-center gap-2 font-bold text-emerald-800 dark:text-emerald-300">
+                  <Store className="w-4 h-4 text-emerald-600" />
+                  <span>In-Shop Pickup (दुकान से प्राप्त करें) &bull; No Delivery Fees</span>
                 </div>
-                <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${freeShippingProgress}%` }}
-                  />
-                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                  Pick up your reserved items at: <strong>Hindustan Computer, Dohrighat Road, Near Bus Stand, Dohrighat, UP - 275303</strong>.
+                  We will verify stock availability on WhatsApp before you visit!
+                </p>
               </div>
 
               {/* Items Card */}
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
                 <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs text-slate-400 uppercase font-bold tracking-wider">
-                  <span>Product</span>
+                  <span>Product Items</span>
                   <button
                     onClick={clearCart}
                     className="text-red-500 hover:underline capitalize"
                   >
-                    Clear Cart
+                    Clear All
                   </button>
                 </div>
 
@@ -122,31 +113,22 @@ export default function CartPage() {
                   {items.map((item) => (
                     <div key={item.id} className="p-4 flex flex-col sm:flex-row items-center gap-4">
                       <img
-                        src={item.image}
+                        src={item.image || 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=200&q=80'}
                         alt={item.name}
-                        className="w-20 h-20 object-contain rounded-2xl bg-slate-50 dark:bg-slate-800 p-2 shrink-0"
+                        className="w-16 h-16 object-contain rounded-xl bg-slate-50 dark:bg-slate-800 p-2 shrink-0 border"
                       />
                       <div className="flex-1 text-center sm:text-left min-w-0">
                         <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
-                          {item.brand}
+                          {item.brand || 'Computer Item'}
                         </span>
-                        <Link href={`/products/${item.slug}`}>
-                          <h3 className="font-semibold text-sm text-slate-900 dark:text-white hover:text-blue-600 line-clamp-2">
-                            {item.name}
-                          </h3>
-                        </Link>
-                        <p className="text-xs text-slate-400 mt-0.5">SKU: {item.sku}</p>
-                        <div className="text-sm font-extrabold text-slate-900 dark:text-white mt-1">
-                          ₹{item.price.toLocaleString('en-IN')}{' '}
-                          {item.mrp > item.price && (
-                            <span className="text-xs text-slate-400 line-through font-normal">
-                              ₹{item.mrp.toLocaleString('en-IN')}
-                            </span>
-                          )}
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                          {item.name}
+                        </h3>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          ₹{item.price.toLocaleString('en-IN')} each
                         </div>
                       </div>
 
-                      {/* Quantity buttons */}
                       <div className="flex items-center gap-3">
                         <div className="flex items-center border border-slate-300 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800">
                           <button
@@ -158,8 +140,7 @@ export default function CartPage() {
                           <span className="px-3 text-xs font-bold">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            disabled={item.quantity >= item.stock}
-                            className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-r disabled:opacity-40"
+                            className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-r"
                           >
                             <Plus className="w-3.5 h-3.5" />
                           </button>
@@ -185,11 +166,11 @@ export default function CartPage() {
 
             {/* Right Summary Box (4 cols) */}
             <div className="lg:col-span-4 space-y-4">
-              {/* Coupon Box */}
+              {/* Promo Code Box */}
               <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl space-y-3 shadow-sm">
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Tag className="w-3.5 h-3.5 text-blue-600" />
-                  Have a Promo Code?
+                  Have a Shop Coupon?
                 </span>
 
                 {couponCode ? (
@@ -230,49 +211,51 @@ export default function CartPage() {
 
               {/* Order Financials */}
               <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl space-y-4 shadow-sm">
-                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">Order Summary</h3>
+                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">Store Pickup Summary</h3>
 
                 <div className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
                   <div className="flex justify-between">
-                    <span>Cart Subtotal</span>
+                    <span>Items Subtotal</span>
                     <span className="font-bold text-slate-900 dark:text-white">
                       ₹{subtotal.toLocaleString('en-IN')}
                     </span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold">
-                      <span>Promo Discount</span>
+                      <span>Discount</span>
                       <span>-₹{discount.toLocaleString('en-IN')}</span>
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span>Shipping Fee</span>
-                    <span>{shipping === 0 ? <strong className="text-emerald-600">FREE</strong> : `₹${shipping}`}</span>
+                  <div className="flex justify-between items-center text-xs">
+                    <span>Fulfillment Mode</span>
+                    <span className="text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full">
+                      Store Pickup (₹0)
+                    </span>
                   </div>
                   <div className="flex justify-between border-t border-slate-100 dark:border-slate-800 pt-3 text-base font-black text-slate-900 dark:text-white">
-                    <span>Final Total</span>
+                    <span>Estimated Total</span>
                     <span className="text-blue-600 dark:text-blue-400">₹{total.toLocaleString('en-IN')}</span>
                   </div>
-                  <p className="text-[10px] text-slate-400 text-right">Includes all taxes (18% GST)</p>
+                  <p className="text-[10px] text-slate-400 text-right">Pay in cash or UPI at the store counter</p>
                 </div>
 
                 <button
                   onClick={() => router.push('/checkout')}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-2xl text-sm shadow-lg shadow-blue-500/25 transition"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-2xl text-xs md:text-sm shadow-lg shadow-blue-500/25 transition"
                 >
-                  <span>Proceed to Checkout</span>
+                  <span>Check Availability & Pickup Details</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
-                {/* Trust Points */}
+                {/* Pickup details */}
                 <div className="space-y-2 pt-2 border-t text-[11px] text-slate-500">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Safe & Encrypted Checkout</span>
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                    <span>Collect from Dohrighat Road, Near Bus Stand, Dohrighat</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <RotateCcw className="w-4 h-4 text-blue-500 shrink-0" />
-                    <span>7 Days Replacement Guarantee</span>
+                    <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span>Pay only after inspecting items in store</span>
                   </div>
                 </div>
               </div>
