@@ -19,41 +19,41 @@ export default function Footer() {
     <footer className="mt-auto bg-slate-900 text-slate-300 text-sm border-t border-slate-800">
       {/* 4 Feature Badges */}
       <div className="border-b border-slate-800 py-6 bg-slate-950/60">
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600/10 text-blue-400 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-6 h-6" />
+        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-left">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600/10 text-blue-400 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div>
-              <h4 className="font-bold text-white text-xs md:text-sm">100% Genuine Products</h4>
-              <p className="text-[11px] text-slate-400">Direct authorized brand warranty</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600/10 text-emerald-400 flex items-center justify-center shrink-0">
-              <Truck className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-bold text-white text-xs md:text-sm">Safe Insured Delivery</h4>
-              <p className="text-[11px] text-slate-400">Doorstep delivery across all India</p>
+            <div className="min-w-0">
+              <h4 className="font-bold text-white text-xs md:text-sm truncate sm:whitespace-normal">100% Genuine</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-400 truncate sm:whitespace-normal">Direct brand warranty</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-600/10 text-amber-400 flex items-center justify-center shrink-0">
-              <CreditCard className="w-6 h-6" />
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-600/10 text-emerald-400 flex items-center justify-center shrink-0">
+              <Truck className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div>
-              <h4 className="font-bold text-white text-xs md:text-sm">UPI, Card & COD</h4>
-              <p className="text-[11px] text-slate-400">Zero fraud server-verified payments</p>
+            <div className="min-w-0">
+              <h4 className="font-bold text-white text-xs md:text-sm truncate sm:whitespace-normal">Insured Delivery</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-400 truncate sm:whitespace-normal">Across all India</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-600/10 text-purple-400 flex items-center justify-center shrink-0">
-              <RotateCcw className="w-6 h-6" />
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-600/10 text-amber-400 flex items-center justify-center shrink-0">
+              <CreditCard className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div>
-              <h4 className="font-bold text-white text-xs md:text-sm">7 Days Replacement</h4>
-              <p className="text-[11px] text-slate-400">Hassle-free hardware replacement</p>
+            <div className="min-w-0">
+              <h4 className="font-bold text-white text-xs md:text-sm truncate sm:whitespace-normal">UPI, Card & COD</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-400 truncate sm:whitespace-normal">Zero fraud verified</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-600/10 text-purple-400 flex items-center justify-center shrink-0">
+              <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="font-bold text-white text-xs md:text-sm truncate sm:whitespace-normal">7 Days Replacement</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-400 truncate sm:whitespace-normal">Hassle-free guarantee</p>
             </div>
           </div>
         </div>
@@ -130,13 +130,13 @@ export default function Footer() {
 
       {/* Bottom Copyright & Payment Methods */}
       <div className="border-t border-slate-800 py-4 bg-slate-950">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 text-center sm:text-left">
           <p>&copy; {new Date().getFullYear()} Hindustan Computer. All rights reserved. Computer Sales, Repair & IT Services • Dohrighat, Uttar Pradesh.</p>
-          <div className="flex items-center gap-2">
-            <span className="bg-slate-800 px-2 py-0.5 rounded text-[11px] text-slate-300 font-mono">UPI / GPay / PhonePe</span>
-            <span className="bg-slate-800 px-2 py-0.5 rounded text-[11px] text-slate-300 font-mono">RuPay</span>
-            <span className="bg-slate-800 px-2 py-0.5 rounded text-[11px] text-slate-300 font-mono">Net Banking</span>
-            <span className="bg-slate-800 px-2 py-0.5 rounded text-[11px] text-slate-300 font-mono">Cash on Delivery</span>
+          <div className="flex flex-wrap justify-center sm:justify-end items-center gap-1.5 sm:gap-2">
+            <span className="bg-slate-800 px-2 py-0.5 rounded text-[10px] sm:text-[11px] text-slate-300 font-mono">UPI / GPay</span>
+            <span className="bg-slate-800 px-2 py-0.5 rounded text-[10px] sm:text-[11px] text-slate-300 font-mono">RuPay</span>
+            <span className="bg-slate-800 px-2 py-0.5 rounded text-[10px] sm:text-[11px] text-slate-300 font-mono">Net Banking</span>
+            <span className="bg-slate-800 px-2 py-0.5 rounded text-[10px] sm:text-[11px] text-slate-300 font-mono">Cash on Delivery</span>
           </div>
         </div>
       </div>

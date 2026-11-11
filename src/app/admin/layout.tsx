@@ -52,6 +52,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
       </div>
 
+      {/* Mobile Backdrop */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-xs"
+        />
+      )}
+
       {/* Sidebar Navigation */}
       <aside
         className={`fixed md:sticky top-0 inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 p-5 flex flex-col justify-between transition-transform duration-200 border-r border-slate-800 ${

@@ -392,7 +392,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Shopkeeper Trust Badges */}
-            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400">
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
                 <span>{product.warranty || 'Brand Warranty'}</span>

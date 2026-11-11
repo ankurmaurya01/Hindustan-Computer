@@ -85,14 +85,14 @@ Hello technician! Can this problem be repaired at your Dohrighat shop? Please le
   };
 
   return (
-    <section id="repair-inquiry" className="max-w-7xl mx-auto px-4">
-      <div className="bg-gradient-to-br from-blue-900 via-slate-900 to-indigo-950 border border-blue-800/50 rounded-3xl p-6 md:p-10 shadow-2xl text-white">
-        <div className="max-w-3xl space-y-3 mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-wider">
-            <HelpCircle className="w-4 h-4 text-amber-400" />
+    <section id="repair-inquiry" className="max-w-7xl mx-auto px-3 sm:px-4">
+      <div className="bg-gradient-to-br from-blue-900 via-slate-900 to-indigo-950 border border-blue-800/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-10 shadow-2xl text-white">
+        <div className="max-w-3xl space-y-2 sm:space-y-3 mb-6 sm:mb-8">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[11px] sm:text-xs font-bold uppercase tracking-wider">
+            <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
             Repair & Service Consultation
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-tight">
             Can It Be Repaired? Ask Our Shop Technician!
           </h2>
           <p className="text-xs md:text-sm text-slate-300 leading-relaxed">

@@ -84,24 +84,24 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
       {/* Top Announcement Bar */}
-      <div className="bg-brand-navy text-white text-xs py-1.5 px-4">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="bg-blue-600 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded tracking-wide">
+      <div className="bg-brand-navy text-white text-xs py-1.5 px-3 sm:px-4 overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1.5 sm:gap-2 text-center sm:text-left">
+          <div className="flex items-center gap-1.5 sm:gap-2 max-w-full">
+            <span className="bg-blue-600 text-[9px] sm:text-[10px] uppercase font-bold px-1.5 py-0.5 rounded tracking-wide shrink-0">
               Official Store
             </span>
-            <span className="truncate">
-              📍 Store Pickup at Dohrighat Shop &bull; Check Stock on WhatsApp &bull; Computer & Laptop Repair
+            <span className="truncate text-[11px] sm:text-xs text-slate-200">
+              📍 Dohrighat Shop &bull; WhatsApp Stock &bull; Repair Service
             </span>
           </div>
-          <div className="flex items-center gap-4 text-slate-300">
+          <div className="flex items-center gap-3 sm:gap-4 text-slate-300 text-[11px] sm:text-xs">
             <a
               href="https://wa.me/919935908565"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-emerald-400 transition"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+              <MessageCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <span>WhatsApp Shop: +91 99359 08565</span>
             </a>
             <span className="hidden md:inline text-slate-500">|</span>
@@ -114,28 +114,28 @@ export default function Header() {
       </div>
 
       {/* Main Header */}
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+          className="lg:hidden p-1.5 sm:p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg shrink-0"
           aria-label="Toggle menu"
         >
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
         </button>
 
         {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition">
-            <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
+        <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition shrink-0">
+            <svg className="w-4 h-4 sm:w-6 sm:h-6 fill-current" viewBox="0 0 24 24">
               <path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v10h16V6H4zm4 13h8v2H8v-2z" />
             </svg>
           </div>
-          <div>
-            <span className="font-extrabold text-xl md:text-2xl tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
+          <div className="min-w-0">
+            <span className="font-extrabold text-sm sm:text-xl md:text-2xl tracking-tight text-slate-900 dark:text-white flex items-center gap-1 truncate">
               HINDUSTAN <span className="text-blue-600 dark:text-blue-400">COMPUTER</span>
             </span>
-            <span className="text-[10px] tracking-wider uppercase font-semibold text-slate-500 dark:text-slate-400 block -mt-1">
+            <span className="text-[9px] sm:text-[10px] tracking-wider uppercase font-semibold text-slate-500 dark:text-slate-400 block -mt-0.5 sm:-mt-1 truncate">
               PC &bull; Laptop &bull; IT Hardware
             </span>
           </div>
@@ -211,23 +211,23 @@ export default function Header() {
         </div>
 
         {/* Right Action Icons */}
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-3 shrink-0">
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition"
+            className="p-1.5 sm:p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition"
             title="Toggle Dark / Light Mode"
           >
-            {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5" />}
+            {theme === 'dark' ? <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
           </button>
 
           {/* Wishlist Icon */}
           <Link
             href="/wishlist"
-            className="relative p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition"
+            className="relative p-1.5 sm:p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition"
             title="Wishlist"
           >
-            <Heart className="w-5 h-5" />
+            <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
             {wishlistCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {wishlistCount}
@@ -238,10 +238,10 @@ export default function Header() {
           {/* Cart Icon */}
           <button
             onClick={() => setIsCartOpen(true)}
-            className="relative p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition"
+            className="relative p-1.5 sm:p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition"
             title="Cart"
           >
-            <ShoppingCart className="w-5 h-5" />
+            <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
             {itemCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
                 {itemCount}

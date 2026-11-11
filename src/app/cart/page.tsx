@@ -111,13 +111,27 @@ export default function CartPage() {
 
                 <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {items.map((item) => (
-                    <div key={item.id} className="p-4 flex flex-col sm:flex-row items-center gap-4">
-                      <img
-                        src={item.image || 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=200&q=80'}
-                        alt={item.name}
-                        className="w-16 h-16 object-contain rounded-xl bg-slate-50 dark:bg-slate-800 p-2 shrink-0 border"
-                      />
-                      <div className="flex-1 text-center sm:text-left min-w-0">
+                    <div key={item.id} className="p-3 sm:p-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+                      <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <img
+                          src={item.image || 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=200&q=80'}
+                          alt={item.name}
+                          className="w-16 h-16 object-contain rounded-xl bg-slate-50 dark:bg-slate-800 p-2 shrink-0 border"
+                        />
+                        <div className="flex-1 min-w-0 sm:hidden">
+                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">
+                            {item.brand || 'Computer Item'}
+                          </span>
+                          <h3 className="font-bold text-xs text-slate-900 dark:text-white line-clamp-2">
+                            {item.name}
+                          </h3>
+                          <div className="text-xs text-slate-500 mt-0.5">
+                            ₹{item.price.toLocaleString('en-IN')} each
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="hidden sm:block flex-1 text-left min-w-0">
                         <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
                           {item.brand || 'Computer Item'}
                         </span>
@@ -129,7 +143,7 @@ export default function CartPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
                         <div className="flex items-center border border-slate-300 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -146,7 +160,7 @@ export default function CartPage() {
                           </button>
                         </div>
 
-                        <span className="text-sm font-extrabold min-w-[80px] text-right text-slate-900 dark:text-white">
+                        <span className="text-sm font-extrabold min-w-[70px] sm:min-w-[80px] text-right text-slate-900 dark:text-white">
                           ₹{(item.price * item.quantity).toLocaleString('en-IN')}
                         </span>
 

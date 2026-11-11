@@ -95,8 +95,8 @@ export default function HomePage() {
 
       <main className="flex-1 space-y-10 pb-16">
         {/* Hero Banner Slider */}
-        <section className="max-w-7xl mx-auto px-4 pt-4">
-          <div className="relative overflow-hidden rounded-3xl bg-slate-900 aspect-21/9 md:aspect-24/9 min-h-[300px] shadow-xl flex items-center">
+        <section className="max-w-7xl mx-auto px-3 sm:px-4 pt-2 sm:pt-4">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-slate-900 min-h-[340px] sm:min-h-[300px] md:aspect-24/9 shadow-xl flex items-center">
             {banners.length > 0 ? (
               banners.map((slide, idx) => (
                 <div
@@ -114,34 +114,34 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-transparent" />
 
                   {/* Slide Content */}
-                  <div className="relative z-20 max-w-xl p-6 md:p-12 space-y-3">
+                  <div className="relative z-20 max-w-xl p-4 sm:p-6 md:p-12 space-y-2.5 sm:space-y-3">
                     {slide.badge && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600/90 text-white font-extrabold text-[11px] uppercase tracking-wider shadow-sm">
-                        <Sparkles className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-blue-600/90 text-white font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider shadow-sm">
+                        <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                         {slide.badge}
                       </span>
                     )}
-                    <h1 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
                       {slide.title}
                     </h1>
                     <p className="text-xs md:text-sm text-slate-300 line-clamp-2">
                       {slide.subtitle}
                     </p>
-                    <div className="pt-2 flex flex-wrap gap-3">
+                    <div className="pt-2 flex flex-wrap gap-2.5 sm:gap-3">
                       <Link
                         href={slide.link || '/products'}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs md:text-sm rounded-xl shadow-lg transition"
+                        className="inline-flex items-center gap-1.5 sm:gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs md:text-sm rounded-xl shadow-lg transition"
                       >
                         <span>{slide.buttonText || 'Browse Shop'}</span>
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </Link>
                       <a
                         href="https://wa.me/919935908565?text=Hi%20Hindustan%20Computer,%20I%20have%20an%20inquiry%20regarding%20products%20or%20repair%20services."
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs md:text-sm rounded-xl backdrop-blur-md transition"
+                        className="inline-flex items-center gap-1.5 sm:gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs md:text-sm rounded-xl backdrop-blur-md transition"
                       >
-                        <MessageCircle className="w-4 h-4 text-emerald-400" />
+                        <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
                         <span>Chat on WhatsApp</span>
                       </a>
                     </div>
@@ -149,7 +149,7 @@ export default function HomePage() {
                 </div>
               ))
             ) : (
-              <div className="p-12 text-white">Loading shop details...</div>
+              <div className="p-8 sm:p-12 text-white text-xs sm:text-sm">Loading shop details...</div>
             )}
 
             {/* Slider Dots */}
@@ -170,58 +170,57 @@ export default function HomePage() {
         </section>
 
         {/* Quick Highlights Strip */}
-        <section className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-            <div className="flex items-center gap-3 p-2">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                <Shield className="w-5 h-5" />
+        <section className="max-w-7xl mx-auto px-3 sm:px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-sm">
+            <div className="flex items-center gap-2.5 sm:gap-3 p-1 sm:p-2 min-w-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Genuine Parts</h4>
-                <p className="text-[11px] text-slate-500">Keyboards, SSDs, inks & cables</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-2">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <Wrench className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Expert Repair</h4>
-                <p className="text-[11px] text-slate-500">Fast laptop & PC diagnostics</p>
+              <div className="min-w-0">
+                <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">Genuine Parts</h4>
+                <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">Keyboards, SSDs & inks</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-2">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                <Disc className="w-5 h-5" />
+            <div className="flex items-center gap-2.5 sm:gap-3 p-1 sm:p-2 min-w-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <Wrench className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Windows Setup</h4>
-                <p className="text-[11px] text-slate-500">OS installation from ₹200</p>
+              <div className="min-w-0">
+                <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">Expert Repair</h4>
+                <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">Fast PC diagnostics</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-2">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                <PhoneCall className="w-5 h-5" />
+            <div className="flex items-center gap-2.5 sm:gap-3 p-1 sm:p-2 min-w-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                <Disc className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <h4 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">Direct Support</h4>
-                <p className="text-[11px] text-slate-500">Talk directly to shopkeeper</p>
+              <div className="min-w-0">
+                <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">Windows Setup</h4>
+                <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">OS setup from ₹200</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5 sm:gap-3 p-1 sm:p-2 min-w-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                <PhoneCall className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">Direct Support</h4>
+                <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">Talk to shopkeeper</p>
               </div>
             </div>
           </div>
         </section>
 
-
         {/* Our Computer Services (Reflecting https://hindustan-computer.netlify.app/) */}
-        <section className="max-w-7xl mx-auto px-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <section className="max-w-7xl mx-auto px-3 sm:px-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm space-y-5 sm:space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
               <div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-1">
                   <Wrench className="w-3.5 h-3.5" />
                   Service & Maintenance
                 </div>
-                <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white">
                   Our Computer & Laptop Services
                 </h2>
                 <p className="text-xs text-slate-500 max-w-xl">
@@ -232,7 +231,7 @@ export default function HomePage() {
                 href="https://wa.me/919935908565?text=Hi%20Hindustan%20Computer,%20I%20need%20help%20with%20a%20computer%20service%20request."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition shrink-0"
+                className="w-full sm:w-auto text-center inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition shrink-0"
               >
                 <MessageCircle className="w-4 h-4 fill-current" />
                 <span>Request Service on WhatsApp</span>
@@ -374,32 +373,32 @@ export default function HomePage() {
         )}
 
         {/* Normal Budget Desktop PC Assembly Banner */}
-        <section className="max-w-7xl mx-auto px-4">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-6 md:p-10 border border-blue-900/40 shadow-xl">
+        <section className="max-w-7xl mx-auto px-3 sm:px-4">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-5 sm:p-6 md:p-10 border border-blue-900/40 shadow-xl">
             <div className="relative z-10 max-w-2xl space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase">
-                <Monitor className="w-4 h-4" />
+              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[11px] sm:text-xs font-bold uppercase">
+                <Monitor className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 Custom Desktop Assembly
               </div>
-              <h3 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight">
                 Need a Desktop PC for Home, Office, or Study?
               </h3>
               <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
                 Tell us your budget (e.g. ₹12,000, ₹18,000, or ₹25,000) and requirement (Shop billing, Tally, student study, CSC center, or internet browsing). We assemble tested desktop PCs with warranty, monitors, and accessories!
               </p>
-              <div className="flex flex-wrap gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 pt-2">
                 <a
                   href="https://wa.me/919935908565?text=Hi%20Hindustan%20Computer,%20I%20want%20to%20get%20a%20quotation%20for%20an%20assembled%20desktop%20PC.%20My%20budget%20is%20₹"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs md:text-sm rounded-xl shadow-lg transition"
+                  className="w-full sm:w-auto text-center inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs md:text-sm rounded-xl shadow-lg transition"
                 >
-                  <MessageCircle className="w-5 h-5 fill-current" />
+                  <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
                   <span>Get Free PC Quotation on WhatsApp</span>
                 </a>
                 <Link
                   href="/products"
-                  className="inline-flex items-center gap-2 px-5 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs md:text-sm rounded-xl transition border border-slate-700"
+                  className="w-full sm:w-auto text-center inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs md:text-sm rounded-xl transition border border-slate-700"
                 >
                   <span>Browse All Products</span>
                   <ArrowRight className="w-4 h-4" />
@@ -412,10 +411,10 @@ export default function HomePage() {
 
         {/* Available Products Grid (when items are added) */}
         {products.length > 0 && (
-          <section className="max-w-7xl mx-auto px-4">
+          <section className="max-w-7xl mx-auto px-3 sm:px-4">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                   Available in Store
                 </h2>
                 <p className="text-xs text-slate-500">Genuine computer peripherals and accessories</p>
@@ -438,14 +437,14 @@ export default function HomePage() {
         )}
 
         {/* Offline Showroom Visit Callout */}
-        <section className="max-w-7xl mx-auto px-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+        <section className="max-w-7xl mx-auto px-3 sm:px-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 shadow-sm">
             <div className="space-y-2 text-center md:text-left">
               <span className="text-xs font-bold text-blue-600 uppercase tracking-widest flex items-center justify-center md:justify-start gap-1">
                 <MapPin className="w-4 h-4" />
                 Visit Our Local Shop
               </span>
-              <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white">
                 Visit Hindustan Computer in Dohrighat
               </h3>
               <p className="text-xs text-slate-500 max-w-lg">
@@ -453,19 +452,19 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2.5 sm:gap-3 shrink-0">
               <a
                 href="https://maps.app.goo.gl/QrpkQuvfyPWnit8E9"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-5 py-2.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold rounded-xl text-center hover:opacity-90 transition flex items-center justify-center gap-1.5"
+                className="w-full sm:w-auto px-4 py-2.5 sm:px-5 sm:py-2.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold rounded-xl text-center hover:opacity-90 transition flex items-center justify-center gap-1.5"
               >
                 <MapPin className="w-4 h-4 text-red-500" />
                 <span>Google Maps Location</span>
               </a>
               <a
                 href="tel:+919935908565"
-                className="px-5 py-2.5 bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-slate-700 text-xs font-bold rounded-xl text-center hover:bg-blue-100 transition flex items-center justify-center gap-1.5"
+                className="w-full sm:w-auto px-4 py-2.5 sm:px-5 sm:py-2.5 bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-slate-700 text-xs font-bold rounded-xl text-center hover:bg-blue-100 transition flex items-center justify-center gap-1.5"
               >
                 <PhoneCall className="w-4 h-4" />
                 <span>Call: +91 99359 08565</span>
