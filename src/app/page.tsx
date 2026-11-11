@@ -7,6 +7,7 @@ import Footer from '@/components/customer/Footer';
 import ProductCard from '@/components/customer/ProductCard';
 import RepairInquiry from '@/components/customer/RepairInquiry';
 import GoogleReview from '@/components/customer/GoogleReview';
+import ShopLandmark from '@/components/customer/ShopLandmark';
 import {
   Laptop,
   Monitor,
@@ -440,42 +441,8 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* Offline Showroom Visit Callout */}
-        <section className="max-w-7xl mx-auto px-3 sm:px-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 shadow-sm">
-            <div className="space-y-2 text-center md:text-left">
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest flex items-center justify-center md:justify-start gap-1">
-                <MapPin className="w-4 h-4" />
-                Visit Our Local Shop
-              </span>
-              <h3 className="text-lg sm:text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white">
-                Visit Hindustan Computer in Dohrighat
-              </h3>
-              <p className="text-xs text-slate-500 max-w-lg">
-                Located at <strong>Dohrighat Road, Near Bus Stand, Dohrighat, UP - 275303</strong>. Buy keyboards, mouse, printer inks, SSDs, cables, laptop chargers, or bring your computer for quick servicing!
-              </p>
-            </div>
-
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2.5 sm:gap-3 shrink-0">
-              <a
-                href="https://maps.app.goo.gl/QrpkQuvfyPWnit8E9"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto px-4 py-2.5 sm:px-5 sm:py-2.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold rounded-xl text-center hover:opacity-90 transition flex items-center justify-center gap-1.5"
-              >
-                <MapPin className="w-4 h-4 text-red-500" />
-                <span>Google Maps Location</span>
-              </a>
-              <a
-                href="tel:+919935908565"
-                className="w-full sm:w-auto px-4 py-2.5 sm:px-5 sm:py-2.5 bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-slate-700 text-xs font-bold rounded-xl text-center hover:bg-blue-100 transition flex items-center justify-center gap-1.5"
-              >
-                <PhoneCall className="w-4 h-4" />
-                <span>Call: +91 99359 08565</span>
-              </a>
-            </div>
-          </div>
-        </section>
+        {/* Offline Showroom Visit & Landmark Callout */}
+        <ShopLandmark />
 
       </main>
 

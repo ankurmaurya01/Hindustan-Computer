@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Header from '@/components/customer/Header';
 import Footer from '@/components/customer/Footer';
 import {
@@ -43,9 +44,30 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Shop Details Cards (5 cols) */}
           <div className="lg:col-span-5 space-y-4">
+            {/* Shopfront Photo Card */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
+              <div className="relative w-full h-56 sm:h-64">
+                <Image
+                  src="/shop-front.png"
+                  alt="Hindustan Computer Shop Front - Dohrighat"
+                  fill
+                  className="object-cover object-center"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/90 text-white inline-block mb-1">
+                    Verified Shopfront
+                  </span>
+                  <p className="text-xs font-bold">Hindustan Computer Sales &amp; Service</p>
+                  <p className="text-[11px] text-white/80">Near Jai Guru Dev Ashram, Dohrighat</p>
+                </div>
+              </div>
+            </div>
+
             <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl space-y-4 shadow-sm">
               <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                Showroom Address & Hours
+                Showroom Address &amp; Hours
               </h3>
 
               <div className="space-y-4 text-xs text-slate-600 dark:text-slate-300">
@@ -54,8 +76,11 @@ export default function ContactPage() {
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
-                    <strong className="block text-slate-900 dark:text-white mb-0.5">Physical Shop Location:</strong>
-                    <a href="https://maps.app.goo.gl/QrpkQuvfyPWnit8E9" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Dohrighat Road, Near Bus Stand, Dohrighat, UP - 275303 ↗</a>
+                    <strong className="block text-slate-900 dark:text-white mb-0.5">Physical Shop Location &amp; Landmark:</strong>
+                    <p className="text-slate-700 dark:text-slate-300 mb-1">Jai Guru Dev Ashram Road, Near Dohrighat Bus Stand, Dohrighat, Mau, UP - 275303</p>
+                    <a href="https://maps.app.goo.gl/QrpkQuvfyPWnit8E9" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 font-bold hover:underline inline-flex items-center gap-1">
+                      <span>Open in Google Maps ↗</span>
+                    </a>
                   </div>
                 </div>
 
