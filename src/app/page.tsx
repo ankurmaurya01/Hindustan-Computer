@@ -6,6 +6,7 @@ import Header from '@/components/customer/Header';
 import Footer from '@/components/customer/Footer';
 import ProductCard from '@/components/customer/ProductCard';
 import RepairInquiry from '@/components/customer/RepairInquiry';
+import GoogleReview from '@/components/customer/GoogleReview';
 import {
   Laptop,
   Monitor,
@@ -168,6 +169,9 @@ export default function HomePage() {
             )}
           </div>
         </section>
+
+        {/* Google Review Banner */}
+        <GoogleReview />
 
         {/* Quick Highlights Strip */}
         <section className="max-w-7xl mx-auto px-3 sm:px-4">
